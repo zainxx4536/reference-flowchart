@@ -1,0 +1,55 @@
+{
+  "canvas": {
+    "width": 1500,
+    "height": 1030,
+    "title": "端到端主线与反馈闭环（布局示例）",
+    "subtitle": "模块与可选学习支路均需根据本次论文或代码重新建立。",
+    "font_size": 24
+  },
+  "description": "通用布局示例，不代表任何真实系统。上方从输入到本轮输出；下方观测、估计、决策后返回执行端；历史学习支路仅在来源确有时保留。",
+  "zones": [
+    {"id":"business","x":50,"y":120,"width":1400,"height":250,"title":"本轮业务主线"},
+    {"id":"controller","x":50,"y":440,"width":1400,"height":520,"title":"观测、状态与控制闭环"},
+    {"id":"learning","parent":"controller","x":90,"y":690,"width":1320,"height":220,"title":"可选学习支路：材料确有时才保留","font_size":26,"title_y":725}
+  ],
+  "nodes": [
+    {"id":"input","parent":"business","x":90,"y":220,"width":260,"height":100,"lines":["业务输入","数据／信号／任务"]},
+    {"id":"execute","parent":"business","x":600,"y":220,"width":280,"height":100,"lines":["执行端","按当前控制参数处理"]},
+    {"id":"result","parent":"business","x":1130,"y":220,"width":260,"height":100,"lines":["本轮输出","处理结果与质量评估"]},
+    {"id":"observe","parent":"controller","x":1130,"y":520,"width":260,"height":100,"lines":["采集观测","整理本轮反馈"]},
+    {"id":"state","parent":"controller","x":680,"y":520,"width":330,"height":100,"lines":["状态／特征构建","形成下一轮决策依据"]},
+    {"id":"policy","parent":"controller","x":160,"y":520,"width":350,"height":100,"lines":["控制策略","产生下一轮控制量"]},
+    {"id":"memory","parent":"learning","x":1050,"y":740,"width":320,"height":150,"shape":"cylinder","font_size":23,"line_height":30,"lines":["交互记录（可选）","来源要求保存的数据"]},
+    {"id":"sample","parent":"learning","x":620,"y":760,"width":330,"height":110,"font_size":23,"lines":["历史学习（可选）","抽样／批量计算"]},
+    {"id":"weights","parent":"learning","x":180,"y":760,"width":330,"height":110,"font_size":23,"lines":["更新参数（可选）","按来源规定的条件执行"]}
+  ],
+  "edges": [
+    {"id":"input-execute","from":"input","to":"execute","kind":"main","points":[[350,270],[600,270]]},
+    {"id":"execute-result","from":"execute","to":"result","kind":"main","points":[[880,270],[1130,270]]},
+    {"id":"result-observe","from":"result","to":"observe","kind":"feedback","points":[[1260,320],[1260,520]]},
+    {"id":"observe-state","from":"observe","to":"state","kind":"feedback","points":[[1130,570],[1010,570]]},
+    {"id":"state-policy","from":"state","to":"policy","kind":"control","points":[[680,570],[510,570]]},
+    {"id":"policy-execute","from":"policy","to":"execute","kind":"control","points":[[335,520],[335,400],[740,400],[740,320]]},
+    {"id":"record","from":"observe","to":"memory","kind":"learning","points":[[1260,620],[1260,660],[1210,660],[1210,740]]},
+    {"id":"replay","from":"memory","to":"sample","kind":"learning","points":[[1050,815],[950,815]]},
+    {"id":"learn","from":"sample","to":"weights","kind":"learning","points":[[620,815],[510,815]]},
+    {"id":"updated-estimate","from":"weights","to":"state","kind":"learning","points":[[345,760],[345,650],[845,650],[845,620]]}
+  ],
+  "labels": [
+    {"x":1280,"y":415,"text":"本轮反馈","font_size":22,"anchor":"start"},
+    {"x":525,"y":426,"text":"下一轮控制命令","font_size":22},
+    {"x":1320,"y":676,"text":"本轮记录","font_size":21},
+    {"x":710,"y":679,"text":"参数更新后用于后续估计","font_size":21},
+    {"x":750,"y":947,"text":"本例只演示画法，不代表所有系统都包含训练。","font_size":22},
+    {"x":750,"y":1008,"text":"上方读取本轮业务主线；下方返回执行端，进入下一轮。","font_size":22}
+  ],
+  "paths": [
+    {"name":"业务输入到本轮输出","nodes":["input","execute","result"]},
+    {"name":"反馈控制闭环","nodes":["result","observe","state","policy","execute","result"]},
+    {"name":"可选学习反馈","nodes":["observe","memory","sample","weights","state"]}
+  ],
+  "notes": [
+    "示例仅用于查看排版和验证脚本。绘制真实系统时，先核对当前来源，再决定保留哪些模块、支路与时序。",
+    "循环箭头表示下一轮行为，不表示本轮数据倒流。可选学习支路需要按真实材料决定是否存在、如何抽样、何时更新。"
+  ]
+}

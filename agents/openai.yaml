@@ -1,0 +1,4 @@
+interface:
+  display_name: "科研与程序流程图"
+  short_description: "按参考图样式绘制完整主线、控制反馈与学习闭环，并核对公式编号与高清导出"
+  default_prompt: "请使用 $reference-flowchart，依据本次论文或代码并参照所附图片，绘制输入输出明确、主线完整、反馈闭环清楚的中文流程图。"
