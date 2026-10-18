@@ -1,0 +1,1861 @@
+{
+  "status": "layout-pass",
+  "scope": "Geometry, fonts and browser rendering. Review semantics independently and inspect the PNG.",
+  "hashes": {
+    "layout": "a29836cd2df1870ff55fd8448947535e6c7d77e5972f732fd14748113ded0bc4",
+    "svg": "93f73be31a4e6f19c1cbd8267cff43e31d3019917171315dbe3df77aa1bc40bc",
+    "png": "691de44c22cf42dd5e4ffa1cb0a3fadc32601d8d82d518093027c5bdf2dc22af"
+  },
+  "runtime": {
+    "platform": "win32",
+    "node": "22.22.3",
+    "playwright": "1.62.1",
+    "browser": "155.0.8059.80"
+  },
+  "fonts": {
+    "family": "SimSun, \"Songti SC\", \"Noto Serif CJK SC\", serif",
+    "sample": "中文流程图",
+    "missingGlyphs": [],
+    "usedFonts": [
+      {
+        "familyName": "SimSun",
+        "postScriptName": "SimSun",
+        "isCustomFont": false,
+        "glyphCount": 5
+      }
+    ]
+  },
+  "pngSize": {
+    "width": 4560,
+    "height": 2940
+  },
+  "fit": {
+    "scroll": 900,
+    "client": 900,
+    "expandedScroll": 900
+  },
+  "nodes": 20,
+  "zones": 6,
+  "edges": 23,
+  "declaredPaths": [
+    {
+      "name": "业务信号主线",
+      "nodes": [
+        "user",
+        "transmitter",
+        "channel",
+        "superposition",
+        "receiver",
+        "sinr",
+        "result"
+      ]
+    },
+    {
+      "name": "选频控制闭环",
+      "nodes": [
+        "transmitter",
+        "channel",
+        "superposition",
+        "receiver",
+        "sensing",
+        "state",
+        "pl",
+        "rcl-rfcl",
+        "q",
+        "policy",
+        "transmitter"
+      ]
+    },
+    {
+      "name": "学习反馈",
+      "nodes": [
+        "state",
+        "experience-join",
+        "memory",
+        "sample",
+        "target",
+        "gradient",
+        "weights",
+        "rcnn"
+      ]
+    }
+  ],
+  "provenance": {
+    "scope": "Declared source locations only; no automatic semantic verification.",
+    "sourcedNodes": 20,
+    "sourcedEdges": 23,
+    "records": [
+      {
+        "type": "node",
+        "id": "user",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "transmitter",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "channel",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "jammer",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "superposition",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "equation": "2",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "receiver",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "sinr",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "equation": "1",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "result",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "sensing",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "reward",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "equation": "3",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "state",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "pl",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "equation": "5",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "rcl-rfcl",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "equation": "6, 7",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "q",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "equation": "4",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "policy",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "memory",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "sample",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "target",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "figure": "3",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "gradient",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "equation": "8",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "node",
+        "id": "weights",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III",
+            "equation": "8",
+            "note": "来源定位记录；请对照当前原文核实。"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "user-input",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "transmit",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "propagate",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "jamming",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "mixed-input",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "assess",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "business-result",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "sense",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "reward",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "new-state",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "state-to-pl",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "pl-to-features",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "features-to-q",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "q-to-policy",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "reliable-control",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "experience-fields",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "reward-to-experience",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "save-experience",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "replay",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "make-target",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "make-loss",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "update-weights",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      },
+      {
+        "type": "edge",
+        "id": "weights-to-network",
+        "sources": [
+          {
+            "kind": "paper",
+            "document": "doi:10.1109/LCOMM.2018.2815018",
+            "section": "II–III"
+          }
+        ]
+      }
+    ]
+  },
+  "geometry": {
+    "bounds": [
+      {
+        "node": null,
+        "text": "基于频谱瀑布图的抗干扰通信总流程",
+        "bounds": {
+          "x": 839.21875,
+          "y": 15,
+          "width": 601.828125,
+          "height": 35
+        },
+        "metricBounds": {
+          "x": 838.21875,
+          "y": 14,
+          "width": 603.5625,
+          "height": 37
+        }
+      },
+      {
+        "node": null,
+        "text": "从用户信号发射、受干扰传输到接收结果，再经选频控制开始下一轮通信",
+        "bounds": {
+          "x": 741,
+          "y": 62,
+          "width": 798,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 740,
+          "y": 62,
+          "width": 800,
+          "height": 25
+        }
+      },
+      {
+        "node": null,
+        "text": "业务信号发射",
+        "bounds": {
+          "x": 249.359375,
+          "y": 135,
+          "width": 171.734375,
+          "height": 26
+        },
+        "metricBounds": {
+          "x": 249.359375,
+          "y": 134,
+          "width": 171.734375,
+          "height": 28
+        }
+      },
+      {
+        "node": null,
+        "text": "无线传播与干扰",
+        "bounds": {
+          "x": 711.0859375,
+          "y": 135,
+          "width": 199.28125,
+          "height": 26
+        },
+        "metricBounds": {
+          "x": 710.0859375,
+          "y": 134,
+          "width": 200.28125,
+          "height": 28
+        }
+      },
+      {
+        "node": null,
+        "text": "接收端：接收、感知与结果反馈",
+        "bounds": {
+          "x": 1485.171875,
+          "y": 135,
+          "width": 400.109375,
+          "height": 26
+        },
+        "metricBounds": {
+          "x": 1485.171875,
+          "y": 134,
+          "width": 400.109375,
+          "height": 28
+        }
+      },
+      {
+        "node": null,
+        "text": "接收端 Agent：运行 ADRLA（状态构建、选频控制与网络学习）",
+        "bounds": {
+          "x": 739.25,
+          "y": 635,
+          "width": 786.953125,
+          "height": 27
+        },
+        "metricBounds": {
+          "x": 739.25,
+          "y": 634,
+          "width": 801.5,
+          "height": 28
+        }
+      },
+      {
+        "node": null,
+        "text": "RCNN：候选频率的 Q 值估计",
+        "bounds": {
+          "x": 991.171875,
+          "y": 704,
+          "width": 358.109375,
+          "height": 26
+        },
+        "metricBounds": {
+          "x": 991.171875,
+          "y": 703,
+          "width": 358.109375,
+          "height": 28
+        }
+      },
+      {
+        "node": null,
+        "text": "经验回放与网络学习（仅训练阶段且经验量充足时）",
+        "bounds": {
+          "x": 614.4296875,
+          "y": 1041,
+          "width": 617.59375,
+          "height": 25
+        },
+        "metricBounds": {
+          "x": 613.4296875,
+          "y": 1040,
+          "width": 633.140625,
+          "height": 27
+        }
+      },
+      {
+        "node": "user",
+        "text": "待发送",
+        "bounds": {
+          "x": 51.765625,
+          "y": 315.75,
+          "width": 76.96875,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 51.765625,
+          "y": 315.75,
+          "width": 76.9765625,
+          "height": 25
+        }
+      },
+      {
+        "node": "user",
+        "text": "用户信号",
+        "bounds": {
+          "x": 40,
+          "y": 349.25,
+          "width": 99,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 40,
+          "y": 349.25,
+          "width": 100,
+          "height": 25
+        }
+      },
+      {
+        "node": "transmitter",
+        "text": "发射端",
+        "bounds": {
+          "x": 297.765625,
+          "y": 299,
+          "width": 74.96875,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 296.765625,
+          "y": 299,
+          "width": 76.46875,
+          "height": 25
+        }
+      },
+      {
+        "node": "transmitter",
+        "text": "按本轮中心频率",
+        "bounds": {
+          "x": 247.5,
+          "y": 332.5,
+          "width": 175,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 247.5,
+          "y": 332.5,
+          "width": 175,
+          "height": 25
+        }
+      },
+      {
+        "node": "transmitter",
+        "text": "发送用户信号",
+        "bounds": {
+          "x": 261,
+          "y": 366,
+          "width": 148,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 260,
+          "y": 366,
+          "width": 150,
+          "height": 25
+        }
+      },
+      {
+        "node": "channel",
+        "text": "无线信道",
+        "bounds": {
+          "x": 619.0234375,
+          "y": 315.75,
+          "width": 102.453125,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 619.0234375,
+          "y": 315.75,
+          "width": 102.46484375,
+          "height": 25
+        }
+      },
+      {
+        "node": "channel",
+        "text": "有用信号传播",
+        "bounds": {
+          "x": 595,
+          "y": 349.25,
+          "width": 150,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 595,
+          "y": 349.25,
+          "width": 150,
+          "height": 25
+        }
+      },
+      {
+        "node": "jammer",
+        "text": "干扰源",
+        "bounds": {
+          "x": 889.265625,
+          "y": 181.75,
+          "width": 76.96875,
+          "height": 23
+        },
+        "metricBounds": {
+          "x": 889.265625,
+          "y": 180.75,
+          "width": 76.9765625,
+          "height": 25
+        }
+      },
+      {
+        "node": "jammer",
+        "text": "动态／智能干扰",
+        "bounds": {
+          "x": 840,
+          "y": 214.25,
+          "width": 175,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 840,
+          "y": 214.25,
+          "width": 175,
+          "height": 25
+        }
+      },
+      {
+        "node": "superposition",
+        "text": "信号叠加（式2）",
+        "bounds": {
+          "x": 831.796875,
+          "y": 299,
+          "width": 178.90625,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 831.796875,
+          "y": 299,
+          "width": 191.40625,
+          "height": 25
+        }
+      },
+      {
+        "node": "superposition",
+        "text": "用户信号＋干扰",
+        "bounds": {
+          "x": 840,
+          "y": 332.5,
+          "width": 175,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 840,
+          "y": 332.5,
+          "width": 175,
+          "height": 25
+        }
+      },
+      {
+        "node": "superposition",
+        "text": "＋环境噪声",
+        "bounds": {
+          "x": 867,
+          "y": 366,
+          "width": 122,
+          "height": 23
+        },
+        "metricBounds": {
+          "x": 865,
+          "y": 366,
+          "width": 125,
+          "height": 25
+        }
+      },
+      {
+        "node": "receiver",
+        "text": "接收机",
+        "bounds": {
+          "x": 1246.765625,
+          "y": 299,
+          "width": 76.96875,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1246.765625,
+          "y": 299,
+          "width": 76.9765625,
+          "height": 25
+        }
+      },
+      {
+        "node": "receiver",
+        "text": "接收混合信号",
+        "bounds": {
+          "x": 1210,
+          "y": 332.5,
+          "width": 149,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1210,
+          "y": 332.5,
+          "width": 150,
+          "height": 25
+        }
+      },
+      {
+        "node": "receiver",
+        "text": "分支感知与通信评估",
+        "bounds": {
+          "x": 1173.5,
+          "y": 366,
+          "width": 224,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1172.5,
+          "y": 366,
+          "width": 225,
+          "height": 25
+        }
+      },
+      {
+        "node": "sinr",
+        "text": "评估通信是否成功",
+        "bounds": {
+          "x": 1523.046875,
+          "y": 299,
+          "width": 203.40625,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1523.046875,
+          "y": 299,
+          "width": 203.90625,
+          "height": 25
+        }
+      },
+      {
+        "node": "sinr",
+        "text": "本轮 SINR 与门限比较",
+        "bounds": {
+          "x": 1500,
+          "y": 332.5,
+          "width": 250,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1500,
+          "y": 332.5,
+          "width": 250,
+          "height": 25
+        }
+      },
+      {
+        "node": "sinr",
+        "text": "（式1）",
+        "bounds": {
+          "x": 1594.25,
+          "y": 367,
+          "width": 61.5,
+          "height": 22
+        },
+        "metricBounds": {
+          "x": 1581.25,
+          "y": 366,
+          "width": 87.5,
+          "height": 25
+        }
+      },
+      {
+        "node": "result",
+        "text": "本次通信结果",
+        "bounds": {
+          "x": 1933.53125,
+          "y": 299,
+          "width": 152.4375,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1933.53125,
+          "y": 299,
+          "width": 152.9375,
+          "height": 25
+        }
+      },
+      {
+        "node": "result",
+        "text": "接收成功／失败",
+        "bounds": {
+          "x": 1922.5,
+          "y": 332.5,
+          "width": 175,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1922.5,
+          "y": 332.5,
+          "width": 175,
+          "height": 25
+        }
+      },
+      {
+        "node": "result",
+        "text": "本轮业务链路输出",
+        "bounds": {
+          "x": 1910,
+          "y": 366,
+          "width": 198,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1910,
+          "y": 366,
+          "width": 200,
+          "height": 25
+        }
+      },
+      {
+        "node": "sensing",
+        "text": "持续感知整个通信频带",
+        "bounds": {
+          "x": 1263.5546875,
+          "y": 460.75,
+          "width": 253.390625,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1262.5546875,
+          "y": 460.75,
+          "width": 254.890625,
+          "height": 25
+        }
+      },
+      {
+        "node": "sensing",
+        "text": "新频谱观测 st+1（式2）",
+        "bounds": {
+          "x": 1257.75,
+          "y": 494.25,
+          "width": 251.5,
+          "height": 29.5
+        },
+        "metricBounds": {
+          "x": 1257.75,
+          "y": 494.25,
+          "width": 264.5,
+          "height": 31.5
+        }
+      },
+      {
+        "node": "reward",
+        "text": "Agent 计算奖励 rt（式3）",
+        "bounds": {
+          "x": 1821.828125,
+          "y": 462.5,
+          "width": 292.84375,
+          "height": 29.5
+        },
+        "metricBounds": {
+          "x": 1821.828125,
+          "y": 462.5,
+          "width": 305.34375,
+          "height": 31.5
+        }
+      },
+      {
+        "node": "reward",
+        "text": "通信成功收益 − 换频成本",
+        "bounds": {
+          "x": 1828.2265625,
+          "y": 502.5,
+          "width": 293.53125,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1828.2265625,
+          "y": 502.5,
+          "width": 293.546875,
+          "height": 25
+        }
+      },
+      {
+        "node": "state",
+        "text": "构建频谱瀑布图",
+        "bounds": {
+          "x": 1881.7890625,
+          "y": 766.5,
+          "width": 176.921875,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1880.7890625,
+          "y": 766.5,
+          "width": 178.421875,
+          "height": 25
+        }
+      },
+      {
+        "node": "state",
+        "text": "更新为下一状态 St+1",
+        "bounds": {
+          "x": 1857.5,
+          "y": 800,
+          "width": 225,
+          "height": 29.5
+        },
+        "metricBounds": {
+          "x": 1856.5,
+          "y": 800,
+          "width": 227,
+          "height": 31.5
+        }
+      },
+      {
+        "node": "state",
+        "text": "新观测＋保留的历史频谱",
+        "bounds": {
+          "x": 1832.5,
+          "y": 833.5,
+          "width": 275,
+          "height": 23
+        },
+        "metricBounds": {
+          "x": 1832.5,
+          "y": 833.5,
+          "width": 275,
+          "height": 25
+        }
+      },
+      {
+        "node": "pl",
+        "text": "PL 预处理",
+        "bounds": {
+          "x": 1457.5234375,
+          "y": 767.5,
+          "width": 115.453125,
+          "height": 22
+        },
+        "metricBounds": {
+          "x": 1457.5234375,
+          "y": 766.5,
+          "width": 115.453125,
+          "height": 25
+        }
+      },
+      {
+        "node": "pl",
+        "text": "阈值过滤噪声",
+        "bounds": {
+          "x": 1442,
+          "y": 800,
+          "width": 147,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1440,
+          "y": 800,
+          "width": 150,
+          "height": 25
+        }
+      },
+      {
+        "node": "pl",
+        "text": "（式5）",
+        "bounds": {
+          "x": 1484.25,
+          "y": 834.5,
+          "width": 61.5,
+          "height": 22
+        },
+        "metricBounds": {
+          "x": 1471.25,
+          "y": 833.5,
+          "width": 87.5,
+          "height": 25
+        }
+      },
+      {
+        "node": "rcl-rfcl",
+        "text": "RCL／RFCL",
+        "bounds": {
+          "x": 1124.296875,
+          "y": 767.5,
+          "width": 116.40625,
+          "height": 22
+        },
+        "metricBounds": {
+          "x": 1124.296875,
+          "y": 766.5,
+          "width": 116.41796875,
+          "height": 25
+        }
+      },
+      {
+        "node": "rcl-rfcl",
+        "text": "时频特征与递归复用",
+        "bounds": {
+          "x": 1071,
+          "y": 800,
+          "width": 222,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1070,
+          "y": 800,
+          "width": 225,
+          "height": 25
+        }
+      },
+      {
+        "node": "rcl-rfcl",
+        "text": "（式6、7）",
+        "bounds": {
+          "x": 1133,
+          "y": 834.5,
+          "width": 99,
+          "height": 22
+        },
+        "metricBounds": {
+          "x": 1120,
+          "y": 833.5,
+          "width": 125,
+          "height": 25
+        }
+      },
+      {
+        "node": "q",
+        "text": "候选频率 Q 值",
+        "bounds": {
+          "x": 752.28125,
+          "y": 766.5,
+          "width": 165.9375,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 752.28125,
+          "y": 766.5,
+          "width": 165.94140625,
+          "height": 25
+        }
+      },
+      {
+        "node": "q",
+        "text": "估计折扣长期回报",
+        "bounds": {
+          "x": 735,
+          "y": 801,
+          "width": 200,
+          "height": 23
+        },
+        "metricBounds": {
+          "x": 735,
+          "y": 800,
+          "width": 200,
+          "height": 25
+        }
+      },
+      {
+        "node": "q",
+        "text": "（式4）",
+        "bounds": {
+          "x": 804.25,
+          "y": 834.5,
+          "width": 61.5,
+          "height": 22
+        },
+        "metricBounds": {
+          "x": 791.25,
+          "y": 833.5,
+          "width": 87.5,
+          "height": 25
+        }
+      },
+      {
+        "node": "policy",
+        "text": "ADRLA：选择下一轮频率",
+        "bounds": {
+          "x": 199.5703125,
+          "y": 766.5,
+          "width": 270.359375,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 199.5703125,
+          "y": 766.5,
+          "width": 270.359375,
+          "height": 25
+        }
+      },
+      {
+        "node": "policy",
+        "text": "训练：ε-贪心，保留探索",
+        "bounds": {
+          "x": 192.25,
+          "y": 800,
+          "width": 285.5,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 191.25,
+          "y": 800,
+          "width": 287.5,
+          "height": 25
+        }
+      },
+      {
+        "node": "policy",
+        "text": "推理：选最大 Q 对应频率",
+        "bounds": {
+          "x": 191.25,
+          "y": 833.5,
+          "width": 287.5,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 191.25,
+          "y": 833.5,
+          "width": 287.5,
+          "height": 25
+        }
+      },
+      {
+        "node": "memory",
+        "text": "经验池 D",
+        "bounds": {
+          "x": 1929.0234375,
+          "y": 1145,
+          "width": 101.953125,
+          "height": 22
+        },
+        "metricBounds": {
+          "x": 1929.0234375,
+          "y": 1144,
+          "width": 101.96484375,
+          "height": 25
+        }
+      },
+      {
+        "node": "memory",
+        "text": "保存每轮完整交互",
+        "bounds": {
+          "x": 1880,
+          "y": 1177.5,
+          "width": 200,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1880,
+          "y": 1177.5,
+          "width": 200,
+          "height": 25
+        }
+      },
+      {
+        "node": "memory",
+        "text": "(St, at, rt, st+1)",
+        "bounds": {
+          "x": 1883,
+          "y": 1212,
+          "width": 194.5,
+          "height": 28.5
+        },
+        "metricBounds": {
+          "x": 1878,
+          "y": 1211,
+          "width": 204,
+          "height": 31.5
+        }
+      },
+      {
+        "node": "sample",
+        "text": "经验回放",
+        "bounds": {
+          "x": 1519.0234375,
+          "y": 1144,
+          "width": 102.453125,
+          "height": 23
+        },
+        "metricBounds": {
+          "x": 1519.0234375,
+          "y": 1144,
+          "width": 102.46484375,
+          "height": 25
+        }
+      },
+      {
+        "node": "sample",
+        "text": "均匀随机抽取小批量",
+        "bounds": {
+          "x": 1457.5,
+          "y": 1177.5,
+          "width": 225,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1457.5,
+          "y": 1177.5,
+          "width": 225,
+          "height": 25
+        }
+      },
+      {
+        "node": "sample",
+        "text": "结合历史重建下一状态",
+        "bounds": {
+          "x": 1446,
+          "y": 1211,
+          "width": 248,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1445,
+          "y": 1211,
+          "width": 250,
+          "height": 25
+        }
+      },
+      {
+        "node": "target",
+        "text": "构造学习目标",
+        "bounds": {
+          "x": 1094.53125,
+          "y": 1144,
+          "width": 152.4375,
+          "height": 23
+        },
+        "metricBounds": {
+          "x": 1093.53125,
+          "y": 1144,
+          "width": 153.44140625,
+          "height": 25
+        }
+      },
+      {
+        "node": "target",
+        "text": "奖励与下一状态最大 Q",
+        "bounds": {
+          "x": 1045,
+          "y": 1177.5,
+          "width": 249.5,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 1045,
+          "y": 1177.5,
+          "width": 250,
+          "height": 25
+        }
+      },
+      {
+        "node": "target",
+        "text": "（图3）",
+        "bounds": {
+          "x": 1139.25,
+          "y": 1212,
+          "width": 61.5,
+          "height": 22
+        },
+        "metricBounds": {
+          "x": 1126.25,
+          "y": 1211,
+          "width": 87.5,
+          "height": 25
+        }
+      },
+      {
+        "node": "gradient",
+        "text": "重新计算样本 Q",
+        "bounds": {
+          "x": 680.7890625,
+          "y": 1144,
+          "width": 178.421875,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 680.7890625,
+          "y": 1144,
+          "width": 178.4296875,
+          "height": 25
+        }
+      },
+      {
+        "node": "gradient",
+        "text": "与目标比较并求损失梯度",
+        "bounds": {
+          "x": 633.5,
+          "y": 1177.5,
+          "width": 273,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 632.5,
+          "y": 1177.5,
+          "width": 275,
+          "height": 25
+        }
+      },
+      {
+        "node": "gradient",
+        "text": "（式8）",
+        "bounds": {
+          "x": 739.25,
+          "y": 1212,
+          "width": 61.5,
+          "height": 22
+        },
+        "metricBounds": {
+          "x": 726.25,
+          "y": 1211,
+          "width": 87.5,
+          "height": 25
+        }
+      },
+      {
+        "node": "weights",
+        "text": "更新 RCNN 参数",
+        "bounds": {
+          "x": 256.546875,
+          "y": 1144,
+          "width": 178.40625,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 255.546875,
+          "y": 1144,
+          "width": 179.41796875,
+          "height": 25
+        }
+      },
+      {
+        "node": "weights",
+        "text": "梯度下降，迭代学习",
+        "bounds": {
+          "x": 232.5,
+          "y": 1177.5,
+          "width": 222,
+          "height": 24
+        },
+        "metricBounds": {
+          "x": 232.5,
+          "y": 1177.5,
+          "width": 225,
+          "height": 25
+        }
+      },
+      {
+        "node": "weights",
+        "text": "（式8）",
+        "bounds": {
+          "x": 314.25,
+          "y": 1212,
+          "width": 61.5,
+          "height": 22
+        },
+        "metricBounds": {
+          "x": 301.25,
+          "y": 1211,
+          "width": 87.5,
+          "height": 25
+        }
+      },
+      {
+        "node": null,
+        "text": "本轮频率来自初始化选频",
+        "bounds": {
+          "x": 219.5,
+          "y": 194,
+          "width": 231,
+          "height": 19
+        },
+        "metricBounds": {
+          "x": 219.5,
+          "y": 193,
+          "width": 231,
+          "height": 21
+        }
+      },
+      {
+        "node": null,
+        "text": "或上一轮 Agent 决策",
+        "bounds": {
+          "x": 235.25,
+          "y": 225,
+          "width": 199.5,
+          "height": 20
+        },
+        "metricBounds": {
+          "x": 235.25,
+          "y": 224,
+          "width": 199.5,
+          "height": 21
+        }
+      },
+      {
+        "node": null,
+        "text": "干扰信号",
+        "bounds": {
+          "x": 943,
+          "y": 258,
+          "width": 83,
+          "height": 20
+        },
+        "metricBounds": {
+          "x": 943,
+          "y": 258,
+          "width": 84,
+          "height": 21
+        }
+      },
+      {
+        "node": null,
+        "text": "可靠控制链路",
+        "bounds": {
+          "x": 350,
+          "y": 457,
+          "width": 132,
+          "height": 20
+        },
+        "metricBounds": {
+          "x": 350,
+          "y": 456,
+          "width": 132,
+          "height": 22
+        }
+      },
+      {
+        "node": null,
+        "text": "下轮频率 at+1",
+        "bounds": {
+          "x": 351,
+          "y": 489,
+          "width": 131,
+          "height": 25.5
+        },
+        "metricBounds": {
+          "x": 350,
+          "y": 488,
+          "width": 134,
+          "height": 28.5
+        }
+      },
+      {
+        "node": null,
+        "text": "全频带新观测",
+        "bounds": {
+          "x": 1611,
+          "y": 548,
+          "width": 137,
+          "height": 21
+        },
+        "metricBounds": {
+          "x": 1611,
+          "y": 547,
+          "width": 138,
+          "height": 23
+        }
+      },
+      {
+        "node": null,
+        "text": "动作 at+1：下一次通信中心频率",
+        "bounds": {
+          "x": 173.5,
+          "y": 891,
+          "width": 323,
+          "height": 27
+        },
+        "metricBounds": {
+          "x": 173.5,
+          "y": 890,
+          "width": 323,
+          "height": 30
+        }
+      },
+      {
+        "node": null,
+        "text": "训练时关闭递归；固定参数后启用递归计算。",
+        "bounds": {
+          "x": 940,
+          "y": 896,
+          "width": 446,
+          "height": 22
+        },
+        "metricBounds": {
+          "x": 940,
+          "y": 896,
+          "width": 460,
+          "height": 23
+        }
+      },
+      {
+        "node": null,
+        "text": "新观测＋本轮已缓存的 St、at",
+        "bounds": {
+          "x": 1449,
+          "y": 962,
+          "width": 290,
+          "height": 25.5
+        },
+        "metricBounds": {
+          "x": 1449,
+          "y": 961,
+          "width": 291,
+          "height": 28.5
+        }
+      },
+      {
+        "node": null,
+        "text": "奖励 rt",
+        "bounds": {
+          "x": 2125,
+          "y": 997,
+          "width": 73,
+          "height": 25.5
+        },
+        "metricBounds": {
+          "x": 2125,
+          "y": 996,
+          "width": 74,
+          "height": 28.5
+        }
+      },
+      {
+        "node": null,
+        "text": "每轮保存完整交互",
+        "bounds": {
+          "x": 2010,
+          "y": 1052,
+          "width": 192,
+          "height": 22
+        },
+        "metricBounds": {
+          "x": 2010,
+          "y": 1051,
+          "width": 192,
+          "height": 24
+        }
+      },
+      {
+        "node": null,
+        "text": "更新权重 θ，供后续 Q 值估计使用",
+        "bounds": {
+          "x": 586,
+          "y": 988,
+          "width": 366,
+          "height": 22
+        },
+        "metricBounds": {
+          "x": 586,
+          "y": 987,
+          "width": 368,
+          "height": 23
+        }
+      },
+      {
+        "node": null,
+        "text": "训练满足条件时先更新参数，再进行下一轮选频；达到迭代上限后固定参数。",
+        "bounds": {
+          "x": 539,
+          "y": 1284,
+          "width": 768,
+          "height": 22
+        },
+        "metricBounds": {
+          "x": 539,
+          "y": 1284,
+          "width": 782,
+          "height": 23
+        }
+      },
+      {
+        "node": null,
+        "text": "启动：初始状态全零、网络参数随机、经验池为空；通信与选频按闭环持续运行。",
+        "bounds": {
+          "x": 709,
+          "y": 1335,
+          "width": 848,
+          "height": 23
+        },
+        "metricBounds": {
+          "x": 708,
+          "y": 1334,
+          "width": 864,
+          "height": 24
+        }
+      },
+      {
+        "node": null,
+        "text": "时序：本轮用 at 发送；接收反馈更新 St+1、选择 at+1，经控制链路返回发射端，开始下一轮通信。",
+        "bounds": {
+          "x": 61,
+          "y": 1391,
+          "width": 995.5,
+          "height": 27
+        },
+        "metricBounds": {
+          "x": 60,
+          "y": 1390,
+          "width": 1010.5,
+          "height": 30
+        }
+      },
+      {
+        "node": null,
+        "text": "经验中的 st+1 是新一条频谱观测，回放时结合历史重建完整下一状态；论文用 SINR 门限定义通信成功。",
+        "bounds": {
+          "x": 60,
+          "y": 1429,
+          "width": 1056.5,
+          "height": 28
+        },
+        "metricBounds": {
+          "x": 60,
+          "y": 1429,
+          "width": 1070.5,
+          "height": 30
+        }
+      }
+    ]
+  },
+  "issues": []
+}

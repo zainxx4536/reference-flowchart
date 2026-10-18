@@ -4,6 +4,8 @@
 
 原文：*Anti-Jamming Communications Using Spectrum Waterfall: A Deep Reinforcement Learning Approach*，2018，DOI `10.1109/LCOMM.2018.2815018`。本例核对第Ⅱ、Ⅲ节、图1至图3和算法1，不是代码运行或硬件通信验证。
 
+仓库不分发论文 PDF；请通过 [DOI](https://doi.org/10.1109/LCOMM.2018.2815018) 获取原文。可复现的自制图件输入为 [../example/paper-flowchart.json](../example/paper-flowchart.json)，对应的 SVG、HTML、PNG 和检查报告见 `example/`。来源记录是人工定位，不是自动语义验证。
+
 ## 结构
 
 - 物理主线：待发送用户信号 → 发射端 → 无线信道 → 用户信号与干扰、噪声叠加 → 接收机 → 本轮通信成功／失败。

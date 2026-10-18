@@ -6,12 +6,17 @@ Standard library only. Semantic review and routing remain the caller's work.
 from __future__ import annotations
 
 import argparse
+import hashlib
+import os
+import tempfile
 import html
 import json
-import math
 import re
+import sys
 from pathlib import Path
 from urllib.parse import quote
+
+from flowchart_spec import prepare, validate_geometry
 
 
 def escape(value):
@@ -40,62 +45,10 @@ def text(x, y, value, size=25, bold=False, anchor="middle", extra=""):
 
 
 def validate(spec):
-    canvas = spec["canvas"]
-    width, height = float(canvas["width"]), float(canvas["height"])
-    if not all(math.isfinite(v) and 100 <= v <= 20000 for v in (width, height)):
-        raise ValueError("Canvas dimensions must be finite numbers between 100 and 20000.")
-    if not spec.get("nodes"):
-        raise ValueError("At least one node is required.")
-    objects = {}
-    for kind in ("zones", "nodes", "junctions"):
-        for obj in spec.get(kind, []):
-            id_ = obj["id"]
-            if not re.fullmatch(r"[a-zA-Z][a-zA-Z0-9_-]*", id_) or id_ in objects:
-                raise ValueError(f"Invalid or duplicate object id: {id_}")
-            objects[id_] = obj
-            x, y = float(obj["x"]), float(obj["y"])
-            w, h = (float(obj["width"]), float(obj["height"])) if kind != "junctions" else (0, 0)
-            if not all(math.isfinite(v) for v in (x, y, w, h)):
-                raise ValueError(f"Non-finite geometry: {id_}")
-            if x < 0 or y < 0 or x+w > width or y+h > height or (kind != "junctions" and min(w, h) <= 0):
-                raise ValueError(f"Object outside canvas or non-positive size: {id_}")
-            if kind == "nodes" and (obj.get("shape", "rect") not in ("rect", "cylinder") or not obj.get("lines")):
-                raise ValueError(f"Node needs lines and a supported shape: {id_}")
-    for obj in objects.values():
-        if obj.get("parent"):
-            parent = objects.get(obj["parent"])
-            if not parent or parent not in spec.get("zones", []):
-                raise ValueError(f"Unknown parent zone: {obj['id']}")
-            if not (parent["x"] <= obj["x"] and parent["y"] <= obj["y"] and
-                    obj["x"]+obj.get("width", 0) <= parent["x"]+parent["width"] and
-                    obj["y"]+obj.get("height", 0) <= parent["y"]+parent["height"]):
-                raise ValueError(f"Object is not contained in parent zone: {obj['id']}")
-    edge_ids, links = set(), set()
-    for edge in spec.get("edges", []):
-        id_ = edge["id"]
-        if not re.fullmatch(r"[a-zA-Z][a-zA-Z0-9_-]*", id_) or id_ in edge_ids:
-            raise ValueError(f"Invalid or duplicate edge id: {id_}")
-        edge_ids.add(id_)
-        if edge["from"] not in objects or edge["to"] not in objects:
-            raise ValueError(f"Unknown endpoint in edge: {id_}")
-        points = edge["points"]
-        if len(points) < 2:
-            raise ValueError(f"Edge needs at least two points: {id_}")
-        for p in points:
-            if len(p) != 2 or not all(math.isfinite(float(v)) for v in p) or not (0 <= p[0] <= width and 0 <= p[1] <= height):
-                raise ValueError(f"Invalid point in edge: {id_}")
-        for p, q in zip(points, points[1:]):
-            if p[0] != q[0] and p[1] != q[1]:
-                raise ValueError(f"Helper supports orthogonal routing only: {id_}")
-        links.add((edge["from"], edge["to"]))
-    for route in spec.get("paths", []):
-        for a, b in zip(route["nodes"], route["nodes"][1:]):
-            if (a, b) not in links:
-                raise ValueError(f"Declared path '{route['name']}' has no edge {a} -> {b}")
-    return width, height
+    return validate_geometry(spec)
 
 
-def render(spec):
+def render(spec, layout_hash=""):
     width, height = validate(spec)
     canvas = spec["canvas"]
     size = float(canvas.get("font_size", 25))
@@ -129,15 +82,18 @@ def render(spec):
         radius = float(n.get("ellipse_radius", 14))
         shape = n.get("shape", "rect")
         padding_y = 2*radius+7 if shape == "cylinder" else 7
-        parts.append(f'<g class="node" id="node-{n["id"]}" data-box="{x},{y},{w},{h}" data-padding-y="{padding_y}">')
+        parts.append(f'<g class="node" id="node-{n["id"]}" data-box="{x},{y},{w},{h}" data-padding-y="{padding_y}" data-shape="{shape}">')
         if shape == "cylinder":
             parts.append(
                 f'<path class="box" d="M{x},{y+radius} a{w/2},{radius} 0 0 1 {w},0 v{h-2*radius} '
                 f'a{w/2},{radius} 0 0 1 {-w},0 Z"/>'
                 f'<path class="arc" d="M{x},{y+radius} a{w/2},{radius} 0 0 0 {w},0"/>'
             )
+        elif shape == "diamond":
+            parts.append(f'<polygon class="box" points="{x+w/2},{y} {x+w},{y+h/2} {x+w/2},{y+h} {x},{y+h/2}"/>')
         else:
-            parts.append(f'<rect class="box" x="{x}" y="{y}" width="{w}" height="{h}"/>')
+            rounded = f' rx="{min(w,h)/2}"' if shape == "terminator" else ""
+            parts.append(f'<rect class="box" x="{x}" y="{y}" width="{w}" height="{h}"{rounded}/>')
         baseline = y+h/2-(len(n["lines"])-1)*line_height/2+font*.34
         for i, line in enumerate(n["lines"]):
             parts.append(text(x+w/2, baseline+i*line_height, line, font, i == 0))
@@ -147,7 +103,7 @@ def render(spec):
     font_family = escape(canvas.get("font_family", 'SimSun, "Songti SC", "Noto Serif CJK SC", serif'))
     title = escape(canvas.get("title", "流程图"))
     description = escape(spec.get("description", "输入、处理、输出及反馈关系。"))
-    return f'''<svg id="flowchart" xmlns="http://www.w3.org/2000/svg" width="{number(width)}" height="{number(height)}" viewBox="0 0 {number(width)} {number(height)}" font-family="{font_family}" role="img" aria-labelledby="chart-title chart-desc">
+    return f'''<svg id="flowchart" data-layout-sha256="{layout_hash}" xmlns="http://www.w3.org/2000/svg" width="{number(width)}" height="{number(height)}" viewBox="0 0 {number(width)} {number(height)}" font-family="{font_family}" role="img" aria-labelledby="chart-title chart-desc">
 <title id="chart-title">{title}</title><desc id="chart-desc">{description}</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 Z" fill="#111"/></marker></defs>
 <style>text{{fill:#111}}.zone>rect{{fill:none;stroke:#111;stroke-width:1.6;stroke-dasharray:10 6}}.flow{{fill:none;stroke:#111;stroke-linejoin:round;stroke-linecap:round}}.box{{fill:#fff;stroke:#111;stroke-width:1.8}}.arc{{fill:none;stroke:#111;stroke-width:1.5}}.junction{{fill:#111}}</style>
@@ -155,33 +111,62 @@ def render(spec):
 
 
 def write_outputs(spec, base, overwrite=False):
+    spec = prepare(spec)
     width, _ = validate(spec)
     outputs = [Path(str(base)+ext) for ext in (".svg", ".html", ".layout.json")]
     if not overwrite and any(p.exists() for p in outputs):
         raise FileExistsError("Output already exists. Use another base or explicitly pass --overwrite.")
     base.parent.mkdir(parents=True, exist_ok=True)
-    svg = render(spec)
+    layout = json.dumps(spec, ensure_ascii=False, indent=2)+"\n"
+    digest = hashlib.sha256(layout.encode("utf-8")).hexdigest()
+    svg = render(spec, digest)
     title = escape(spec["canvas"].get("title", "流程图"))
     notes = "".join(f"<p>{escape(note)}</p>" for note in spec.get("notes", []))
+    sources = []
+    for kind in ("nodes", "edges"):
+        for obj in spec.get(kind, []):
+            for source in obj.get("sources", []):
+                locator = " · ".join(f"{key}={value}" for key, value in source.items() if key not in ("kind", "document"))
+                sources.append(f"<tr><td>{escape(obj['id'])}</td><td>{escape(source['kind'])}</td><td>{escape(source['document'])}</td><td>{escape(locator)}</td></tr>")
+    provenance = ('<details><summary>来源对应记录（用户提供，需独立核对）</summary><table><thead><tr><th>对象</th><th>来源类型</th><th>文献／文件</th><th>定位</th></tr></thead><tbody>'+"".join(sources)+"</tbody></table></details>") if sources else ""
     stem = quote(base.name)
     doc = f'''<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title>
-<style>*{{box-sizing:border-box}}body{{margin:0;background:#eee;color:#111;font-family:"Microsoft YaHei",sans-serif}}.toolbar{{display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding:12px 18px;background:#fff;border-bottom:1px solid #aaa}}.toolbar strong{{margin-right:auto}}button,a{{font:inherit;color:#111}}button,.toolbar a{{padding:6px 10px;border:1px solid #444;background:#fff;text-decoration:none;cursor:pointer}}.viewport{{width:100%;padding:18px;overflow-x:auto}}#flowchart{{display:block;background:white;width:min(100%,{number(width)}px);height:auto;margin:auto}}body.actual #flowchart{{width:{number(width)}px;min-width:{number(width)}px;max-width:none}}.notes{{max-width:1500px;margin:0 auto 20px;padding:12px 24px;background:white;line-height:1.8}}@media print{{.toolbar,.notes{{display:none}}body,.viewport{{margin:0;padding:0;background:white}}#flowchart{{width:100%!important;min-width:0!important;max-width:100%!important}}}}</style></head><body>
+<style>*{{box-sizing:border-box}}body{{margin:0;background:#eee;color:#111;font-family:"Microsoft YaHei",sans-serif}}.toolbar{{display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding:12px 18px;background:#fff;border-bottom:1px solid #aaa}}.toolbar strong{{margin-right:auto}}button,a{{font:inherit;color:#111}}button,.toolbar a{{padding:6px 10px;border:1px solid #444;background:#fff;text-decoration:none;cursor:pointer}}.viewport{{width:100%;padding:18px;overflow-x:auto}}#flowchart{{display:block;background:white;width:min(100%,{number(width)}px);height:auto;margin:auto}}body.actual #flowchart{{width:{number(width)}px;min-width:{number(width)}px;max-width:none}}.notes table{{width:100%;border-collapse:collapse;table-layout:fixed}}.notes th,.notes td{{border:1px solid #aaa;padding:6px;overflow-wrap:anywhere}}.notes{{max-width:1500px;margin:0 auto 20px;padding:12px 24px;background:white;line-height:1.8}}@media print{{.toolbar,.notes{{display:none}}body,.viewport{{margin:0;padding:0;background:white}}#flowchart{{width:100%!important;min-width:0!important;max-width:100%!important}}}}</style></head><body>
 <div class="toolbar"><strong>{title}</strong><button id="scale" type="button">按原尺寸查看</button><button id="print" type="button">打印</button><a href="{stem}.svg" download>矢量 SVG</a><a href="{stem}.png">高清 PNG</a></div>
-<main class="viewport">{svg}</main><div class="notes">{notes}</div>
+<main class="viewport">{svg}</main><div class="notes">{notes}{provenance}</div>
 <script>document.getElementById('scale').onclick=function(){{this.textContent=document.body.classList.toggle('actual')?'适应窗口':'按原尺寸查看'}};document.getElementById('print').onclick=()=>window.print();</script></body></html>'''
-    for target, value in zip(outputs, (svg, doc, json.dumps(spec, ensure_ascii=False, indent=2))):
-        target.write_text(value, encoding="utf-8")
+    staged = []
+    try:
+        for target, value in zip(outputs, (svg, doc, layout)):
+            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", newline="\n", dir=base.parent, delete=False) as temp:
+                staged.append((Path(temp.name), target))
+                temp.write(value)
+        for temp, target in staged:
+            os.replace(temp, target)
+    finally:
+        for temp, _ in staged:
+            temp.unlink(missing_ok=True)
     return outputs
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("spec", type=Path)
-    parser.add_argument("--output-base", required=True, type=Path, help="Output prefix without extension")
+    parser.add_argument("--output-base", type=Path, help="Output prefix without extension")
     parser.add_argument("--overwrite", action="store_true")
+    parser.add_argument("--validate-only", action="store_true", help="Validate and resolve the layout without writing files")
     args = parser.parse_args()
     try:
         spec = json.loads(args.spec.read_text(encoding="utf-8-sig"))
+        if args.validate_only:
+            resolved = prepare(spec)
+            print(json.dumps({"status": "valid", "nodes": len(resolved["nodes"]), "edges": len(resolved.get("edges", []))}))
+            return
+        if args.output_base is None:
+            parser.error("--output-base is required unless --validate-only is set")
         if args.output_base.suffix.lower() in (".svg", ".png", ".html", ".json"):
             raise ValueError("--output-base must not include a file extension.")
         paths = write_outputs(spec, args.output_base.resolve(), args.overwrite)

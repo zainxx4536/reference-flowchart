@@ -1,5 +1,6 @@
 /output/
 /node_modules/
+/.npm-cache/
 /.playwright/
 __pycache__/
 *.py[cod]

@@ -1,0 +1,35 @@
+{
+  "$schema": "../schemas/flowchart.schema.json",
+  "canvas": { "width": 1400, "height": 950, "title": "分支判断与布局辅助示例", "font_size": 24 },
+  "description": "演示起止节点、判断菱形、分支标签、对齐、等间距和避障连线，不代表实际业务。",
+  "nodes": [
+    { "id": "start", "shape": "terminator", "x": 70, "y": 220, "width": 180, "height": 90, "lines": ["开始"] },
+    { "id": "read", "x": 350, "y": 220, "width": 230, "height": 90, "lines": ["读取输入"] },
+    { "id": "decide", "shape": "diamond", "x": 750, "y": 155, "width": 300, "height": 220, "lines": ["满足条件？"] },
+    { "id": "accept", "x": 1100, "y": 220, "width": 230, "height": 90, "lines": ["执行处理"] },
+    { "id": "retry", "x": 750, "y": 540, "width": 300, "height": 100, "lines": ["补充输入", "进入下一轮判断"] },
+    { "id": "end", "shape": "terminator", "x": 1125, "y": 750, "width": 180, "height": 90, "lines": ["结束"] },
+    { "id": "obstacle", "x": 460, "y": 390, "width": 230, "height": 240, "lines": ["无关模块", "连线需绕开"] }
+  ],
+  "layout": {
+    "align": [{ "nodes": ["start", "read"], "axis": "y", "anchor": "center", "value": 265 }],
+    "distribute": [{ "nodes": ["start", "read"], "axis": "x", "gap": 100 }]
+  },
+  "edges": [
+    { "id": "start-read", "from": "start", "to": "read", "route": {"from_port":"right","to_port":"left"} },
+    { "id": "read-decide", "from": "read", "to": "decide", "route": {"from_port":"right","to_port":"left"} },
+    { "id": "yes", "from": "decide", "to": "accept", "route": {"from_port":"right","to_port":"left"} },
+    { "id": "no", "from": "decide", "to": "retry", "route": {"from_port":"bottom","to_port":"top"} },
+    { "id": "retry-read", "from": "retry", "to": "read", "route": {"from_port":"left","to_port":"bottom"} },
+    { "id": "accept-end", "from": "accept", "to": "end", "route": {"from_port":"bottom","to_port":"top"} }
+  ],
+  "labels": [
+    { "x": 1075, "y": 249, "text": "是", "font_size": 22 },
+    { "x": 920, "y": 458, "text": "否", "anchor": "start", "font_size": 22 },
+    { "x": 700, "y": 908, "text": "示例仅演示画法；自动路由避开节点，文字与其他连线仍需检查。", "font_size": 22 }
+  ],
+  "paths": [
+    { "name": "处理完成路径", "nodes": ["start", "read", "decide", "accept", "end"] },
+    { "name": "补充输入闭环", "nodes": ["decide", "retry", "read", "decide"] }
+  ]
+}

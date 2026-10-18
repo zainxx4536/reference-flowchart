@@ -1,222 +1,219 @@
 # Reference Flowchart｜科研与程序流程图
 
-一个面向 Codex 的中文流程图技能：依据论文、代码或流程说明梳理完整主线、输入输出与反馈关系，再参照用户提供的图片绘制流程图，交付可编辑 SVG、可浏览 HTML 和高清 PNG。
+[![Flowchart checks](https://github.com/zainxx4536/reference-flowchart/actions/workflows/ci.yml/badge.svg)](https://github.com/zainxx4536/reference-flowchart/actions/workflows/ci.yml)
 
-默认采用白底黑线、宋体类中文字体、虚线分区和直角模块；用户指定的参考样式优先。技能独立工作，不依赖 Diagram Design 插件。
+一个面向 Codex 的中文流程图技能：依据论文、代码或流程说明，梳理完整主线、输入输出和反馈，再参照用户提供的图片绘制流程图，交付可编辑 SVG、可浏览 HTML 和高清 PNG。
+
+默认采用白底黑线、宋体类中文字体、虚线分区和直角模块；用户提供的参考样式优先。技能独立工作，不依赖 Diagram Design 插件。
 
 ## 示例效果
 
-下面是根据论文 *Anti-Jamming Communications Using Spectrum Waterfall: A Deep Reinforcement Learning Approach* 绘制的案例图，展示从发射端到接收结果的物理主线，以及选频控制和经验回放支路。
+下面是依据 *Anti-Jamming Communications Using Spectrum Waterfall: A Deep Reinforcement Learning Approach* 制作的流程图，展示物理信号主线、选频控制和经验回放支路。
 
-![示例：论文主线、选频控制与经验回放流程图](example/示例_论文主线流程图.png)
+![论文案例：物理主线、选频控制与经验回放](example/示例_论文主线流程图.png)
 
-- [查看原尺寸示例图片（4560 × 2940）](example/示例_论文主线流程图.png)
-- [查看示例论文 PDF](example/示例_论文.pdf)
-- [论文 DOI：10.1109/LCOMM.2018.2815018](https://doi.org/10.1109/LCOMM.2018.2815018)
-- [阅读该论文的来源对应与绘图注意事项](references/paper-case.md)
+- [高清 PNG（4560 × 2940）](example/示例_论文主线流程图.png) · [可编辑 SVG](example/示例_论文主线流程图.svg) · [HTML](example/示例_论文主线流程图.html)
+- [案例输入 JSON](example/paper-flowchart.json) · [解析后的布局](example/示例_论文主线流程图.layout.json) · [运行检查报告](example/示例_论文主线流程图.validation.json)
+- [来源对应说明](references/paper-case.md) · [原论文 DOI](https://doi.org/10.1109/LCOMM.2018.2815018)
 
-这张论文案例图与 `assets/example-flowchart.json` 是两个不同的示例。前者用于展示实际图件；后者是通用的脚本演示输入，不会直接生成上面的论文案例图，也不代表任何真实系统。
+仓库不分发论文 PDF。复现已有图件只需案例 JSON；重新核对论文语义时，请自行提供有权使用的原文。
 
-## 适用场景与能力边界
+另外提供 [通用闭环示例](assets/example-flowchart.json) 和 [分支与布局辅助示例](assets/branching-flowchart.json)。它们是独立演示，不代表实际业务，也不会生成上面的论文案例图。
 
-- 根据论文梳理系统模型、算法主线、模块归属、控制反馈和训练／推理关系，并核对相关式号。
-- 根据程序入口、调用关系和数据变化绘制代码真实实现的流程。
-- 根据业务或信号处理说明绘制完整的输入、处理、输出和闭环。
-- 根据参考图片调整布局、字体、分区和线型，保留可编辑的矢量源文件。
+## 能力与边界
 
-Codex 负责阅读材料、理解语义、设计布局和检查来源；附带脚本只负责把**已经规划好坐标的 JSON** 绘制为图件并检查部分几何问题。脚本不会自动读取论文生成正确流程，也不提供自动布局或通用 LaTeX 排版。
+| 能力 | 实现方式 |
+| --- | --- |
+| 来源核对 | Codex 阅读本次论文或代码，核对输入、输出、模块归属、时序和式号 |
+| 绘图 | Python 标准库把布局 JSON 生成 SVG、HTML 和布局副本 |
+| 规格校验 | 仓库内 JSON Schema 配合图关系检查，错误定位到 `$.nodes[0].font_size` 等字段 |
+| 常用形状 | 矩形 `rect`、圆柱 `cylinder`、判断菱形 `diamond`、起止节点 `terminator` |
+| 布局辅助 | 节点对齐、等间距分布、绕开节点的正交连线路由 |
+| 来源追溯 | 节点和连线支持 `sources`，区分论文、代码和建议设计；HTML 和报告保留定位记录 |
+| 导出与检查 | Playwright 导出 PNG，检查形状边界、文字、叠线、交叉和窗口适配，并记录运行环境、字体及文件哈希 |
 
-## 目录与阅读顺序
+脚本不会自动理解论文，也不提供整个图的自动布局。对齐和路由不能替代整体布局设计；自动路由避开节点，不会自动避开所有文字和其他连线。自动几何检查通过后，仍须查看图片并核对来源。
 
-```text
-reference-flowchart/
-├── README.md                       安装、依赖、运行方法与示例预览
-├── LICENSE                         MIT 许可证
-├── SKILL.md                        Codex 读取的技能入口与工作规则
-├── agents/
-│   └── openai.yaml                  技能显示名称、说明和默认提示词
-├── scripts/
-│   ├── render_flowchart.py          JSON → SVG、HTML、布局副本
-│   └── export_png.cjs               HTML → PNG、几何检查报告
-├── references/
-│   ├── spec-format.md              JSON 字段、坐标约定和脚本参数
-│   └── paper-case.md               示例论文的来源核对记录
-├── assets/
-│   └── example-flowchart.json       可直接运行的通用布局示例
-└── example/
-    ├── 示例_论文.pdf                 论文案例的输入材料
-    └── 示例_论文主线流程图.png        README 中展示的案例图
+## 依赖与安装
+
+| 用途 | 依赖 |
+| --- | --- |
+| 生成 SVG／HTML、校验 JSON | **Python ≥ 3.10**，只用标准库，无需安装 Python 包 |
+| PNG 导出、环境自检、Node 测试 | **Node.js ≥ 22**，以及锁定版本的 Node `playwright` |
+| 截图 | 已有 Chromium／Chrome／Edge，或 Playwright 配套 Chromium |
+| 中文显示 | 可用的中文字体，或显式提供本地 OTF／TTF／WOFF 字体文件 |
+| 使用技能理解材料 | 支持本地技能的 Codex，以及宿主已有的论文、代码和图片读取能力 |
+
+直接运行绘图脚本不需要 OpenAI API Key。Codex 分析材料仍使用你已有的账户或模型配置。PDF 阅读工具不是绘图脚本的依赖，扫描件需要宿主另行具备 OCR 能力。
+
+克隆仓库并安装锁定的 Node 依赖：
+
+```powershell
+git clone https://github.com/zainxx4536/reference-flowchart.git
+cd reference-flowchart
+npm ci --ignore-scripts
 ```
 
-首次使用先看本 README，再看 [SKILL.md](SKILL.md)。需要直接运行脚本或修改 JSON 时阅读 [格式说明](references/spec-format.md)；只有复用该论文案例时才需要阅读 `paper-case.md`。
+`package.json` 和 `package-lock.json` 固定 Playwright **1.62.1**。此命令下载 npm 包，不安装浏览器。已有 Chrome／Edge 时可以直接使用；需要配套 Chromium 时，由使用者主动执行：
 
-`scripts/` 下的两个文件是命令行入口，不需要在别的程序中导入。`SKILL.md`、`agents/openai.yaml` 和 `references/` 是由 Codex 读取的指令或资料；`assets/`、`example/` 提供输入示例和效果示例。
+```powershell
+npx playwright install chromium
+```
 
-## 运行依赖
+Linux 的浏览器系统库可按 [Playwright 官方浏览器文档](https://playwright.dev/docs/browsers) 准备，例如 `npx playwright install --with-deps chromium`。脚本本身不会联网安装依赖、浏览器或字体。
 
-| 用途 | 依赖 | 说明 |
+## 环境自检
+
+在仓库根目录执行：
+
+```powershell
+npm run check:env
+```
+
+自检实际启动浏览器，检查 Python、Node、Playwright、浏览器路径和中文探针字形。结果为 `ready` 时返回退出码 0；缺少依赖或启动失败时为 `not-ready` 并返回非零退出码。
+
+可用命令行参数指定已有依赖：
+
+```powershell
+npm run check:env -- --python "C:/Python/python.exe" --browser-path "C:/Program Files/Google/Chrome/Application/chrome.exe"
+```
+
+也支持下列环境变量；命令行参数优先：
+
+| 环境变量 | 用途 |
+| --- | --- |
+| `FLOWCHART_PYTHON` | Python 可执行文件路径，用于自检、演示和测试入口 |
+| `FLOWCHART_PLAYWRIGHT_MODULE` | 已有 Node Playwright 包目录；默认先查仓库安装，再查可用的 Codex 工作区运行时 |
+| `FLOWCHART_BROWSER_PATH` | Chromium／Chrome／Edge 可执行文件路径 |
+| `FLOWCHART_FONT_PATH` | 本地字体文件，导出时临时加载，不安装到系统 |
+
+默认字体族依次为 SimSun、Songti SC、Noto Serif CJK SC、serif。环境自检用 Chromium 协议记录中文探针**实际使用的字体**，并检查示例字形；这不代表所有字符都已逐一验证。更换字体后应重新导出和查看图件。
+
+需要统一不同机器的字体时，可以提供自己有权使用的本地字体：
+
+```powershell
+$env:FLOWCHART_FONT_PATH = "C:/fonts/your-font.otf"
+npm run demo
+```
+
+也可为自检和 PNG 导出命令追加 `--font-path "C:/fonts/your-font.otf"`。字体只在本次浏览器渲染时加载，SVG／HTML 文件仍保留字体族声明，未内嵌该字体。字体文件最大 32 MiB。
+
+## 快速运行
+
+以下命令均在仓库根目录执行，可重复运行；演示入口只覆盖自身在 `output/` 下的同名演示文件。
+
+```powershell
+npm run demo
+npm run example:paper
+```
+
+`npm run demo` 生成通用闭环和分支示例，`npm run example:paper` 根据案例 JSON 生成论文流程图。输出分别为：
+
+| 示例 | 输出基名 | 默认 PNG 尺寸 |
 | --- | --- | --- |
-| 让 Codex 使用技能 | 支持本地技能的 Codex 环境 | 需要能够读取提供的论文、代码和参考图片；使用宿主已有的材料读取能力 |
-| 生成 SVG／HTML | Python 3 | `render_flowchart.py` 只使用标准库，不需要 `pip install` |
-| 导出 PNG、生成检查报告 | Node.js + **Node 版** `playwright` 包 | Python 版 Playwright 不能替代 Node 包；无需安装 `@playwright/test` |
-| 浏览器截图 | 可启动的 Chromium、Chrome 或 Edge | 可复用已有浏览器，或自行安装 Playwright 配套的 Chromium |
-| 中文文字渲染 | 系统中可用的中文字体 | 默认依次尝试 SimSun、Songti SC、Noto Serif CJK SC、serif；字体会影响字宽和换行，仓库不附带字体文件 |
-| 从论文提取文本（按需） | 宿主现有 PDF 工具，例如 `pypdf`、`pdfplumber` | 不是绘图脚本依赖；扫描版 PDF 还需要单独的 OCR 能力 |
+| 通用闭环 | `output/example-flowchart` | 3000 × 2060 |
+| 判断、起止及布局辅助 | `output/branching-flowchart` | 2800 × 1900 |
+| 论文案例 | `output/paper-flowchart` | 4560 × 2940 |
 
-本次发布验证使用 Windows、Python **3.14.5**、Node.js **22.22.3**、Playwright **1.62.1**、系统 Chrome 和宋体。这里只列实际验证的组合，不声明其他版本或操作系统已经通过验证。
+每个基名对应 `.svg`、`.html`、`.layout.json`、`.png` 和 `.validation.json`。HTML 可直接用浏览器打开，支持适应窗口、原尺寸查看，以及展开节点和连线的来源记录。
 
-两个脚本均可在本地处理文件，不需要 OpenAI API Key。让 Codex 分析材料仍使用你已有的 Codex 账户或模型配置。
+需要自己控制输出路径时，分两步运行：
 
-## 安装到 Codex
+```powershell
+python scripts/render_flowchart.py assets/example-flowchart.json --output-base output/my-flowchart
+node scripts/export_png.cjs output/my-flowchart.html
+```
 
-按照 [OpenAI 官方技能文档](https://learn.chatgpt.com/docs/build-skills)，可以把技能放在项目的 `.agents/skills/` 或用户目录的 `~/.agents/skills/` 下。下面的命令使用 PowerShell。
+只验证输入、不写文件：
 
-### 只在当前项目使用
+```powershell
+python scripts/render_flowchart.py assets/branching-flowchart.json --validate-only
+```
 
-在目标项目根目录运行：
+默认拒绝覆盖输出，确认文件属于本次任务后可为对应命令追加 `--overwrite`。PNG 支持 `--scale 1` 至 `--scale 4`，默认 2 倍。`python`／`node` 不在 PATH 时，用真实可执行路径代替；PowerShell 调用带空格的可执行路径时，在前面加 `&`。
+
+生成器输出的 SVG、HTML 与布局 JSON 必须保持配套。导出会核对布局哈希及 HTML 中的 SVG 是否与独立 SVG 一致；修改输入后重新运行生成和导出步骤。新版本导出器要求重新生成旧版图件。
+
+## 让 Codex 使用技能
+
+按照 [OpenAI 官方技能文档](https://learn.chatgpt.com/docs/build-skills)，可把完整仓库放在项目的 `.agents/skills/reference-flowchart/` 或用户目录的 `~/.agents/skills/reference-flowchart/`。例如在目标项目根目录执行：
 
 ```powershell
 New-Item -ItemType Directory -Force -Path ".agents/skills" | Out-Null
 git clone https://github.com/zainxx4536/reference-flowchart.git ".agents/skills/reference-flowchart"
 ```
 
-### 在多个项目中使用
+在技能目录中按需执行 `npm ci --ignore-scripts`。避免重复安装同名技能；目录已存在时先检查其内容。Git 克隆的技能可用 `git pull --ff-only` 更新。
 
-```powershell
-$skillParent = Join-Path $HOME ".agents/skills"
-New-Item -ItemType Directory -Force -Path $skillParent | Out-Null
-git clone https://github.com/zainxx4536/reference-flowchart.git (Join-Path $skillParent "reference-flowchart")
-```
-
-两种安装方式选择一种即可。目录已存在时，先确认其中的内容；不要直接覆盖已有技能。需要更新 Git 克隆的版本时，可在对应技能目录执行 `git pull --ff-only`。
-
-Codex 通常会自动发现新技能；如果未显示，重启 Codex 后再检查技能列表。通过 `$reference-flowchart` 明确指定技能，并给出材料和输出目录。例如：
+Codex 通常自动发现技能；未显示时可重启后检查。使用示例：
 
 ```text
-请使用 $reference-flowchart。
-依据 example/示例_论文.pdf，参照 example/示例_论文主线流程图.png 的视觉形式，
-绘制论文整体流程图，保留完整输入输出、控制反馈和学习支路。
-涉及公式时只标注原论文式号；输出到当前工作区 output/，交付 SVG、HTML 和高清 PNG。
+请使用 $reference-flowchart，依据我提供的论文或代码，
+参照所附图片的视觉形式绘制完整流程图。
+保留输入输出、控制反馈和材料确有的学习支路；涉及公式只标原文式号。
+关键节点写入来源定位，输出到当前工作区 output/，交付 SVG、HTML 和高清 PNG。
 ```
 
-如果对话工作区不是技能目录，把示例路径替换为可访问的实际路径，或直接附上材料。用于新论文时，必须替换为新材料，不能沿用示例论文的模块和式号。
+用于新论文时必须重新建立模块、连线和式号；参考图片中的业务内容不自动成为新图的事实。
 
-## 直接运行脚本
+## 文件职责与阅读顺序
 
-无需通过 Codex，也可以用附带 JSON 检查本地绘图和导出链路。以下命令均在**本仓库根目录**运行；`python`、`node` 不在 PATH 时，替换为对应可执行文件的路径。PowerShell 调用带空格的可执行路径时，在路径前加 `&`。
-
-### 1. 生成可编辑 SVG 和 HTML
-
-```powershell
-python scripts/render_flowchart.py assets/example-flowchart.json --output-base output/example-flowchart
-```
-
-此步骤只需要 Python 标准库，生成：
+先看本 README，再看 [SKILL.md](SKILL.md)。编辑 JSON 时看 [格式与布局说明](references/spec-format.md)；只有复用论文案例时看 [来源记录](references/paper-case.md)。
 
 ```text
-output/example-flowchart.svg
-output/example-flowchart.html
-output/example-flowchart.layout.json
+reference-flowchart/
+├── SKILL.md、agents/openai.yaml      Codex 技能指令与显示信息
+├── package.json、package-lock.json   Node 依赖和便捷命令
+├── schemas/flowchart.schema.json     JSON 编辑器可用的输入规格
+├── scripts/
+│   ├── render_flowchart.py           Python 命令入口
+│   ├── flowchart_spec.py             标准库规格及图关系校验
+│   ├── layout_helpers.py             对齐、等距与正交避障路由
+│   ├── export_png.cjs                PNG 导出命令入口
+│   ├── check_env.cjs                 环境、浏览器及字体自检
+│   ├── flowchart.cjs、run_tests.cjs   演示与测试入口
+│   └── lib/                         绘图检查和运行时共用模块
+├── assets/                          通用闭环、分支 JSON 示例
+├── example/                         论文案例 JSON 和可编辑图件，无论文 PDF
+├── references/                      按需读取的格式与案例说明
+├── tests/                           输入、几何、文件一致性及真实浏览器回归
+└── .github/workflows/ci.yml          Windows、Linux、macOS 测试矩阵
 ```
 
-HTML 可直接用浏览器打开，支持适应窗口和按原尺寸查看。`.layout.json` 是本次输入的布局副本，PNG 导出脚本会读取它；请将它与同名 HTML 保存在同一目录。
+入口脚本供命令行执行，共用模块由脚本内部导入。`output/`、`node_modules/` 和缓存不会提交到仓库。
 
-### 2. 准备 PNG 导出依赖
-
-先复用已有的 Node Playwright 包和浏览器。在支持该工具的 Codex 环境中，可通过 `load_workspace_dependencies` 查找现有运行时；普通终端用户无需使用这个工具。
-
-本地没有 Node Playwright 时，可自行执行以下安装命令。它会联网下载 npm 包；脚本本身不会自动安装依赖：
+## 检查与测试
 
 ```powershell
-npm install --no-save --package-lock=false playwright
+npm test
+npm run test:unit
 ```
 
-安装方法见 [Playwright Library 官方文档](https://playwright.dev/docs/library)。如需复用本次验证的包版本，可把包名改为 `playwright@1.62.1`。
+`npm test` 运行 Python、Node 几何和真实浏览器测试；`test:unit` 仅运行不需要浏览器的部分。用例包含正常图件、错误字段、无效引用、父分区循环、自动绕障、越框、叠线、端点接触、文字压线、来源记录及文件错配。
 
-已有 Chrome 或 Edge 时，可直接在下一步指定路径。如果希望使用 Playwright 配套的 Chromium，可自行执行以下下载命令：
+检查报告含 `issues`、运行时版本、中文探针实际字体、PNG 尺寸、窗口适配、输入／图件哈希及来源记录。`layout-pass` 表示自动项目通过；`needs-fix` 会返回非零退出码，并保留 PNG 和报告供修正。文字检查结合 SVG 字符位置与 Canvas 字形边界，减少不同字体全局度量造成的误报。
 
-```powershell
-npx playwright install chromium
-```
+CI 配置在 Windows、Linux 和 macOS 上使用 Python 3.12、Node 22、锁定的 Playwright 与配套 Chromium。为了统一字体，CI 显式运行 `tests/prepare_ci_font.py`，下载校验 SHA-256 的 Noto Serif CJK SC 字体及其 OFL 声明，再通过 `FLOWCHART_FONT_PATH` 使用；字体不随仓库分发，应用脚本和 `npm test` 不会自动下载字体。各平台实测状态以 [GitHub Actions](https://github.com/zainxx4536/reference-flowchart/actions/workflows/ci.yml) 为准。
 
-浏览器及 Linux 系统依赖说明见 [Playwright 浏览器文档](https://playwright.dev/docs/browsers)。在无桌面环境的 Linux 中，仍需准备浏览器启动所需的系统库及中文字体。
-
-### 3. 导出高清 PNG
-
-依赖可自动发现时：
-
-```powershell
-node scripts/export_png.cjs output/example-flowchart.html
-```
-
-需要明确指定模块和浏览器时，下面以 Windows Chrome 为例：
-
-```powershell
-node scripts/export_png.cjs output/example-flowchart.html `
-  --playwright-module "./node_modules/playwright" `
-  --browser-path "C:/Program Files/Google/Chrome/Application/chrome.exe" `
-  --scale 2
-```
-
-也可以通过以下环境变量指定已有依赖：
-
-```powershell
-$env:FLOWCHART_PLAYWRIGHT_MODULE = "C:/your-existing-node_modules/playwright"
-$env:FLOWCHART_BROWSER_PATH = "C:/your-browser-location/chrome.exe"
-node scripts/export_png.cjs output/example-flowchart.html
-```
-
-将路径替换为真实位置。命令行参数优先于环境变量；未指定时，脚本尝试加载可用的 `playwright`，再查找 Playwright Chromium 和常见位置的系统浏览器。
-
-导出后新增：
-
-```text
-output/example-flowchart.png
-output/example-flowchart.validation.json
-```
-
-默认 `--scale 2`，支持 1–4。通用示例画布为 1500 × 1030，默认 PNG 应为 **3000 × 2060**。输出目录已被 `.gitignore` 忽略。
-
-### 4. 检查结果并修改布局
-
-打开最终 PNG，检查阅读顺序、文字、箭头、分区和反馈接收者；再查看 `.validation.json`。修改 JSON 后，重新执行生成和导出两步。
-
-两个脚本默认拒绝覆盖已有结果。确认输出文件属于本次任务后，可以分别为两条命令追加 `--overwrite`：
-
-```powershell
-python scripts/render_flowchart.py assets/example-flowchart.json --output-base output/example-flowchart --overwrite
-node scripts/export_png.cjs output/example-flowchart.html --overwrite
-```
-
-创建新图时，可复制通用 JSON 到工作区，按新材料重新规划节点、分区、连线折点和声明路径。详细字段与限制见 [references/spec-format.md](references/spec-format.md)。
-
-## 检查报告如何解读
-
-- Python 阶段检查对象 ID、基础几何范围、分区归属、连线引用、正交折线以及已声明路径的连续性。
-- 浏览器阶段检查部分文字越框、节点重叠、连线穿过无关节点、接入端点、严格内部交叉、PNG 尺寸及窗口适配问题。
-- `status: "layout-pass"` 表示当前自动几何检查通过；仍需查看最终图片，并根据论文或代码核对语义。
-- `status: "needs-fix"` 时进程返回非零退出码，PNG 和报告会保留，供检查 `issues` 并调整布局。
-
-自动检查不证明算法正确，也不代表模型训练、代码实现或真实硬件运行已经通过验证。端点附近的含糊交叉、共线叠线、文字压线和阅读负担仍需要人工检查。
+本地已验证 Windows、Python 3.14.5、Node 22.22.3、Playwright 1.62.1 和系统 Chrome，使用宋体及显式 Noto 字体分别检查图件。不同平台／字体的像素结果可能不同，固定尺寸和检查结果不代表逐像素一致。
 
 ## 常见问题
 
 | 现象 | 处理方式 |
 | --- | --- |
-| 找不到 `python`／`node` | 安装所需运行时，或在命令中使用已有运行时的绝对路径 |
-| `Existing Playwright module not found` | 安装 **Node 版** `playwright`，或用 `--playwright-module` 指向包含 `package.json` 的 Playwright 包目录 |
-| `Existing Chromium browser not found` | 用 `--browser-path` 指定已有 Chrome／Edge，或自行安装 Playwright Chromium |
-| 浏览器存在但启动失败 | 确认路径、可执行权限和系统依赖；若由沙箱限制导致，按宿主权限机制处理 |
-| 中文变方框或排版变化 | 安装可用中文字体，或修改 `canvas.font_family`；更换字体后重新导出和检查 |
-| 找不到 `.layout.json` | 先执行 Python 生成步骤；确认 HTML 与同名布局文件位于同一目录 |
-| `Output already exists`／`PNG/report already exists` | 更换输出基名，或确认文件后为对应命令追加 `--overwrite` |
-| PNG 导出失败，但已有 SVG／HTML | 保留矢量和浏览器文件，补齐依赖后重试 PNG；此时 PNG 交付尚未完成 |
-| 公式显示不符合预期 | 当前仅支持 `S{t+1}` 一类下标写法；优先标原文式号，复杂公式需要另行设计 |
+| Python 或 Node 找不到／版本过低 | 先运行自检；用实际可执行路径或 `FLOWCHART_PYTHON` 指定 Python |
+| Node Playwright 找不到 | 在仓库运行 `npm ci --ignore-scripts`，或指定 `--playwright-module`；Python 版 Playwright 不能替代 Node 包 |
+| 浏览器不存在或不能启动 | 指定 `--browser-path`，或主动安装配套 Chromium，并检查系统库和宿主权限 |
+| 中文缺字或排版不同 | 查看报告的字体信息，准备可用中文字体或指定 `--font-path`，再重新导出和看图 |
+| `$.nodes[...].font_size` 等字段错误 | 根据定位修正 JSON；数字不能写成字符串，未知字段会被拒绝 |
+| 自动路由无解 | 移动节点、调整端口或间距，或改用显式 `points` |
+| 对齐后手写连线接不上 | 对齐会移动节点；手写 `points` 需同步调整，或使用 `route` 重新计算 |
+| SVG、HTML、布局不匹配 | 从输入 JSON 重新生成三者，再导出 PNG；不要混用不同轮次的输出 |
+| 输出已存在 | 更换基名，或确认后为相应命令追加 `--overwrite` |
+| 导出失败但已有 SVG／HTML | 修正报告或依赖后重试；没有成功生成 PNG 时，PNG 交付尚未完成 |
 
 ## 许可证
 
-本项目自有的技能说明、脚本、通用布局示例及项目制作的流程图采用 [MIT License](LICENSE)，允许使用、复制、修改、分发及商业使用；分发时应保留许可证要求的版权与许可声明。
+项目自有的技能说明、脚本、布局示例及自制流程图采用 [MIT License](LICENSE)，允许使用、复制、修改、分发和商业使用；分发时保留许可证要求的版权与许可声明。
 
-**示例论文 `example/示例_论文.pdf` 属于第三方材料，不在本项目 MIT 授权范围内。** 论文著作权归原作者或相应权利人；其使用和再分发应遵守原有授权。仓库中的 MIT 许可证不授予该论文的额外权利。
-
-使用本技能处理你自己的论文、代码或参考图片时，生成结果中涉及的第三方内容仍受其原有权利约束。
+论文原文不随仓库分发，其权利归原作者或相应权利人。第三方代码、图片、论文及字体仍遵守各自授权；本项目 MIT 许可不授予这些材料的额外权利。Playwright 等依赖适用各自许可证。

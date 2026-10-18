@@ -1,0 +1,16 @@
+{
+  "name": "reference-flowchart",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Source-backed Chinese flowcharts with editable SVG and browser-verified PNG export",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "check:env": "node scripts/check_env.cjs",
+    "demo": "node scripts/flowchart.cjs demo",
+    "example:paper": "node scripts/flowchart.cjs paper",
+    "test": "node scripts/run_tests.cjs",
+    "test:unit": "node scripts/run_tests.cjs --no-browser"
+  },
+  "dependencies": { "playwright": "1.62.1" }
+}
