@@ -42,6 +42,7 @@ class SchemaTests(unittest.TestCase):
     def test_bad_ids_and_references(self):
         self.invalid(lambda s: s['nodes'][1].update(id='a'), '$.nodes[1].id')
         self.invalid(lambda s: s['nodes'][0].update(id='bad id'), '$.nodes[0].id')
+        self.invalid(lambda s: s['nodes'][0].update(id='bad\n'), '$.nodes[0].id')
         self.invalid(lambda s: s['edges'][0].update(to='missing'), '$.edges[0].to')
 
     def test_bad_routes(self):
@@ -142,7 +143,7 @@ class ArtifactTests(unittest.TestCase):
             result=subprocess.run([sys.executable,str(ROOT/'scripts/render_flowchart.py'),str(source),'--output-base',str(base)],capture_output=True,encoding='utf-8')
             self.assertEqual(result.returncode,0,result.stderr)
             files=json.loads(result.stdout)['files']
-            self.assertEqual(files[0],str(base)+'.svg')
+            self.assertEqual(files[0],str(base.resolve())+'.svg')
 
 
 if __name__=='__main__':unittest.main()

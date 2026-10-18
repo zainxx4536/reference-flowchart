@@ -53,7 +53,7 @@ def check_schema(value, schema, root, path="$"):
     if kind == "string":
         if len(value) < schema.get("minLength", 0):
             fail(path, "must not be empty")
-        if "pattern" in schema and re.search(schema["pattern"], value) is None:
+        if "pattern" in schema and re.fullmatch(schema["pattern"], value) is None:
             fail(path, f"does not match {schema['pattern']}")
     if kind == "array":
         if len(value) < schema.get("minItems", 0) or len(value) > schema.get("maxItems", math.inf):
