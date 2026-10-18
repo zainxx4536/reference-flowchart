@@ -2,9 +2,9 @@
   "status": "layout-pass",
   "scope": "Geometry, fonts and browser rendering. Review semantics independently and inspect the PNG.",
   "hashes": {
-    "layout": "a29836cd2df1870ff55fd8448947535e6c7d77e5972f732fd14748113ded0bc4",
-    "svg": "93f73be31a4e6f19c1cbd8267cff43e31d3019917171315dbe3df77aa1bc40bc",
-    "png": "691de44c22cf42dd5e4ffa1cb0a3fadc32601d8d82d518093027c5bdf2dc22af"
+    "layout": "d3c97e04214526bc55f6a53cf0d25f063d3220c2a8d6c844909dbd5b6fd74661",
+    "svg": "8d5da975d3039f13e76643c10565c4da4de02f57c3a4eda96391a093e4888f6f",
+    "png": "3aef68a427de47e73d794d11951a87348eb7d76dd8c3881ccce6d8c30d9f5dc9"
   },
   "runtime": {
     "platform": "win32",
@@ -1060,13 +1060,13 @@
         "text": "持续感知整个通信频带",
         "bounds": {
           "x": 1263.5546875,
-          "y": 460.75,
+          "y": 463.75,
           "width": 253.390625,
           "height": 24
         },
         "metricBounds": {
           "x": 1262.5546875,
-          "y": 460.75,
+          "y": 463.75,
           "width": 254.890625,
           "height": 25
         }
@@ -1076,13 +1076,13 @@
         "text": "新频谱观测 st+1（式2）",
         "bounds": {
           "x": 1257.75,
-          "y": 494.25,
+          "y": 497.25,
           "width": 251.5,
           "height": 29.5
         },
         "metricBounds": {
           "x": 1257.75,
-          "y": 494.25,
+          "y": 497.25,
           "width": 264.5,
           "height": 31.5
         }
