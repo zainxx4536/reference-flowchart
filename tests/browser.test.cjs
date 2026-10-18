@@ -24,7 +24,8 @@ for(const [input,size] of [['assets/example-flowchart.json',[3000,2060]],['asset
   test(`actual browser export: ${input}`,async()=>{
     const base=path.join(workspace(),'可编辑 图件');render(path.join(ROOT,input),base);
     const {report}=await exportDiagram({html:base+'.html',scale:2});
-    assert.equal(report.status,'layout-pass');assert.deepEqual(report.issues,[]);
+    if(report.issues.length)console.log('export-issues: '+JSON.stringify({input,issues:report.issues,fonts:report.fonts}));
+    assert.equal(report.status,'layout-pass',JSON.stringify(report.issues));assert.deepEqual(report.issues,[]);
     assert.deepEqual([report.pngSize.width,report.pngSize.height],size);
     assert.ok(report.fonts.usedFonts.length);assert.deepEqual(report.fonts.missingGlyphs,[]);
     if(process.env.FLOWCHART_FONT_PATH)assert.ok(report.geometry.bounds.some(b=>b.metricBounds.height>b.bounds.height));

@@ -12,7 +12,8 @@ function runChecked(command, args) {
   if (result.error) throw result.error;
   if (result.status !== 0) {
     if (process.env.GITHUB_ACTIONS === 'true') {
-      const message = output.slice(-6000).replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
+      const important = output.split(/\r?\n/).filter(line => /export-issues:|^FAIL:|^AssertionError:|^not ok /.test(line)).join('\n');
+      const message = (important + '\n' + output.slice(-1500)).slice(0,30000).replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
       console.log('::error title=Regression test failure::' + message);
     }
     throw Error(`Test command failed (exit ${result.status}).`);
