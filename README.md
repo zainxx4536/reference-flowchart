@@ -42,7 +42,7 @@ Visio 依赖不可用或导出失败时，Codex 会说明原因并询问是否�
 | 布局辅助 | 节点对齐、等间距分布、绕开节点的正交连线路由 |
 | 来源追溯 | 节点和连线支持 `sources`，区分论文、代码和建议设计；HTML 和报告保留定位记录 |
 | PNG 导出与检查 | Playwright 导出 PNG，检查形状边界、文字、叠线、交叉和窗口适配，并记录运行环境、字体及文件哈希 |
-| Visio 可编辑导出 | Python 生成含原生形状、文字和连接线的 VDX，由 Windows 桌面 Visio 转为 `.vsdx`，可选导出预览 |
+| Visio 可编辑导出 | Python 准备 XML 绘图计划，PowerShell 通过桌面 Visio COM 创建原生形状、文字、连接线与胶合关系，保存 `.vsdx` 并可选导出预览 |
 
 脚本不会自动理解论文，也不提供整个图的自动布局。对齐和路由不能替代整体布局设计；自动路由避开节点，不会自动避开所有文字和其他连线。自动几何检查通过后，仍须查看图片并核对来源。
 
@@ -50,14 +50,14 @@ Visio 依赖不可用或导出失败时，Codex 会说明原因并询问是否�
 
 | 用途 | 依赖 |
 | --- | --- |
-| 生成 SVG／HTML、原生 Visio VDX、校验 JSON | **Python ≥ 3.10**，只用标准库，无需安装 Python 包 |
+| 生成 SVG／HTML、Visio 绘图计划、校验 JSON | **Python ≥ 3.10**，只用标准库，无需安装 Python 包 |
 | PNG 导出、环境自检、Node 测试 | **Node.js ≥ 22**，以及锁定版本的 Node `playwright` |
 | PNG 截图 | 已有 Chromium／Chrome／Edge，或 Playwright 配套 Chromium |
 | `.vsdx` 与 Visio 预览 | **Windows、PowerShell、已安装并可通过 COM 启动的桌面版 Microsoft Visio 2013 或更高版本** |
 | 中文显示 | 可用的中文字体，或显式提供本地 OTF／TTF／WOFF 字体文件 |
 | 使用技能理解材料 | 支持本地技能的 Codex，以及宿主已有的论文、代码和图片读取能力 |
 
-Visio 导出不需要 Node、Playwright 或浏览器；仅生成 VDX 中间源可跨平台运行 Python，但 VDX 不自动替代用户选择的 `.vsdx` 交付。Visio 网页版或查看器不能替代桌面 COM 自动化。
+Visio 导出不需要 Node、Playwright 或浏览器。Python 生成 XML 绘图计划，PowerShell 读取计划并使用 Visio COM 原生建图，不依赖 Visio 的 VDX 导入功能。Visio 网页版或查看器不能替代桌面 COM 自动化。
 
 直接运行绘图脚本不需要 OpenAI API Key。Codex 分析材料仍使用你已有的账户或模型配置。PDF 阅读工具不是绘图脚本的依赖，扫描件需要宿主另行具备 OCR 能力。
 
@@ -151,7 +151,7 @@ python scripts/render_flowchart.py assets/branching-flowchart.json --validate-on
 
 ## 生成 Visio 可编辑文件
 
-以下命令以已生成的解析后布局为输入，使用桌面 Visio 保存为 `.vsdx`：
+以下命令以已生成的解析后布局为输入，在独立的桌面 Visio 实例中创建原生对象，保存 `.vsdx` 后核对包结构：
 
 ```powershell
 python scripts/render_flowchart.py assets/branching-flowchart.json --output-base output/my-flowchart
@@ -160,15 +160,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/export_visio.ps1 -La
 
 需要 Visio 实际渲染的预览时，可加 `-PreviewPath output/my-flowchart.visio.png`。Python 不在 PATH 时用 `-PythonPath "C:/Python/python.exe"` 指定；确认后可用 `-Overwrite` 覆盖本次任务的 Visio 输出。生成器覆盖使用 `--overwrite`。
 
-也可只用 Python 标准库生成原生 VDX 中间文件：
+主流程不把中间 XML 交给 Visio 导入，而由 `scripts/visio_native.ps1` 解析并逐一创建图形。XML 绘图计划是临时文件，成功或失败后均会清理；如需单独保留旧版 VDX/XML 中间源，参见 [Visio 输出说明](references/visio-output.md)。VDX 不是 `.vsdx`，部分环境的 VDX 导入受限，不能把它当作已完成的 Visio 交付。
 
-```powershell
-python scripts/export_visio.py output/my-flowchart.layout.json --output output/my-flowchart.vdx
-```
-
-VDX 保留独立形状、文字、连接线与胶合关系，可在桌面 Visio 中打开后另存为 `.vsdx`。用户明确需要 `.vsdx` 时，不能仅交付 VDX 并声称已完成；缺少可用 Visio 时说明限制，询问是否改为 PNG，或由用户明确接受 VDX。默认拒绝覆盖，确认后使用 `--overwrite`。
-
-完成前重新在 Visio 打开 `.vsdx`，检查中文、布局和连接关系，确认文字、形状与连线可分别编辑，并查看 Visio 预览或截图。浏览器 PNG、XML 结构检查或脚本退出成功都不能单独代替实际 Visio 验证。详细限制与检查见 [Visio 输出说明](references/visio-output.md)。
+环境允许时，完成前重新在 Visio 打开 `.vsdx`，检查中文、布局和连接关系，确认文字、形状与连线可分别编辑，并查看 Visio 预览或截图。浏览器 PNG、XML 结构检查或脚本退出成功都不能单独代替实际 Visio 验证。详细限制与检查见 [Visio 输出说明](references/visio-output.md)。
 
 ## 让 Codex 使用技能
 
@@ -207,8 +201,9 @@ reference-flowchart/
 │   ├── flowchart_spec.py             标准库规格及图关系校验
 │   ├── layout_helpers.py             对齐、等距与正交避障路由
 │   ├── export_png.cjs                PNG 导出命令入口
-│   ├── export_visio.py               Python 标准库原生 VDX 导出
-│   ├── export_visio.ps1              桌面 Visio 转存 VSDX、可选预览
+│   ├── export_visio.py               Python 标准库准备 XML 绘图计划
+│   ├── export_visio.ps1              Visio 原生建图、保存 VSDX、可选预览
+│   ├── visio_native.ps1              解析计划并创建原生形状、文字与连接线
 │   ├── check_env.cjs                 环境、浏览器及字体自检
 │   ├── flowchart.cjs、run_tests.cjs   演示与测试入口
 │   └── lib/                         绘图检查和运行时共用模块
@@ -236,7 +231,7 @@ CI 配置在 Windows、Linux 和 macOS 上使用 Python 3.12、Node 22、锁定�
 
 本地已验证 Windows、Python 3.14.5、Node 22.22.3、Playwright 1.62.1 和系统 Chrome，使用宋体及显式 Noto 字体分别检查图件。不同平台／字体的像素结果可能不同，固定尺寸和检查结果不代表逐像素一致。
 
-Visio 的单元检查覆盖 VDX 的 XML 结构、形状、文字和连接关系，不等同于已在桌面 Visio 中验证可打开、可编辑或视觉效果。现有浏览器 CI 不提供桌面 Visio；需要在有可用 Visio 的 Windows 会话中另行运行 `.vsdx` 导出与实际检查。默认 `npm test` 不运行需要 Visio 的集成检查，可单独执行：
+Visio 的单元检查覆盖 XML 绘图计划中的结构、形状、文字和连接关系，不等同于已在桌面 Visio 中验证最终文件可打开、可编辑或视觉效果。现有浏览器 CI 不提供桌面 Visio；需要在有可用 Visio 的 Windows 会话中另行运行 `.vsdx` 导出与实际检查。默认 `npm test` 不运行需要 Visio 的集成检查，可单独执行：
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File tests/visio.integration.ps1 -PythonPath "C:/Python/python.exe"
@@ -259,7 +254,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tests/visio.integration.ps1 
 | 输出已存在 | 更换基名，或确认后为相应命令追加 `--overwrite` |
 | PNG 导出失败但已有 SVG／HTML | 修正报告或依赖后重试；没有成功生成 PNG 时，PNG 交付尚未完成 |
 | Visio 未安装、COM 无法启动或会话受限 | 使用可交互的 Windows 桌面会话检查 Visio；保留源文件并说明失败原因，询问是否切换 PNG，不自动降级 |
-| 仅生成 VDX，没有 `.vsdx` | 用桌面 Visio 打开 VDX 后另存，或修复自动化依赖；用户要求 `.vsdx` 时仍属未完成，除非明确接受 VDX |
+| 仅有 XML／VDX 中间源，没有 `.vsdx` | 使用 PowerShell 入口通过 Visio COM 原生建图；旧版 VDX 在部分环境不能导入，不能视为 `.vsdx` 交付已完成 |
 | Visio 中文缺字或文字位置不同 | 在 Visio 中检查本机字体；浏览器 `--font-path` 不会给 Visio 安装字体，调整源布局后重新导出 |
 
 ## 许可证

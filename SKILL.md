@@ -55,14 +55,14 @@ description: 根据论文、代码或流程说明绘制中文总流程图，并�
 
 ## 实现和导出
 
-两种格式共用经过来源核对的布局。PNG 模式生成矢量 SVG，嵌入 HTML 后用浏览器导出高清 PNG；Visio 模式使用解析后的布局，先生成含原生形状、文字与连接线的 VDX，再由桌面 Visio 打开并保存 `.vsdx`。不要让栅格生成模型重新猜文字。
+两种格式共用经过来源核对的布局。PNG 模式生成矢量 SVG，嵌入 HTML 后用浏览器导出高清 PNG；Visio 模式使用解析后的布局，先生成 XML 绘图计划，再通过桌面 Visio COM 逐一创建原生形状、文字与一维连接线，设置胶合关系并保存 `.vsdx`；主流程不依赖 Visio 导入 VDX。不要让栅格生成模型重新猜文字。
 
 PNG 模式可以手写 SVG，也可以使用附带脚本；Visio 模式需使用布局 JSON 和导出脚本。脚本只负责绘制和几何检查，不代替来源核对、语义判断和布局设计：
 
 1. 使用脚本时读 [references/spec-format.md](references/spec-format.md)，为当前任务创建坐标化 JSON。不要只替换示例文字而保留不合适的结构。
 2. `scripts/render_flowchart.py` 使用 Python 标准库校验规格并生成 SVG、HTML。可用 `layout` 声明对齐与等距，可用边的 `route` 生成绕开节点的正交连线；它们不替代整体布局设计。放用户指定目录；无指定时用当前工作区的 `output/`。
 3. PNG 模式：`scripts/check_env.cjs` 检查运行时、浏览器启动和中文探针的实际字体。`scripts/export_png.cjs` 使用已有 Node Playwright 和本地 Chromium 类浏览器，导出 2 倍 PNG、几何及字体报告。需要统一字体时可指定已有字体文件 `--font-path`。
-4. Visio 模式：读取 [references/visio-output.md](references/visio-output.md)，运行 `scripts/export_visio.ps1 -LayoutPath output/name.layout.json -OutputPath output/name.vsdx`；需要预览时加 `-PreviewPath output/name.visio.png`。`.vsdx` 是主交付，PNG 预览可选。`scripts/export_visio.py` 可只用 Python 生成 VDX 中间源，但用户要求 `.vsdx` 时不能未经同意改交 VDX。
+4. Visio 模式：读取 [references/visio-output.md](references/visio-output.md)，运行 `scripts/export_visio.ps1 -LayoutPath output/name.layout.json -OutputPath output/name.vsdx`；需要预览时加 `-PreviewPath output/name.visio.png`。`.vsdx` 是主交付，PNG 预览可选。入口调用 `scripts/visio_native.ps1` 原生建图，保存后核对 VSDX 包结构；实际编辑与视觉效果仍按下节核对。XML／VDX 中间源不能未经同意替代 `.vsdx` 交付。
 5. 缺依赖时先查现有工作区运行时，可用 `load_workspace_dependencies`。用户需要安装时，README 提供锁定依赖的 `npm ci` 方法；不自动联网安装包、浏览器、字体或 Visio。导出受限时保留源文件，明确尚缺的交付；改变已选输出格式前须取得用户同意。
 6. SVG、HTML 与布局副本由同一次生成操作产生，PNG 导出会核对它们的一致性。修改 JSON 后重新生成三者，再按所选格式重新导出，避免交付不同轮次的文件。报告保留来源定位，但不把填写了 `sources` 当作来源事实已验证。
 
@@ -71,7 +71,7 @@ PNG 模式可以手写 SVG，也可以使用附带脚本；Visio 模式需使用
 - 语义：输入到本轮输出连续，控制确实返回执行端，观测与训练各有接收者。模块归属、初始化、条件分支、时序和式号符合本次来源。
 - 几何：检查文字越框、节点互压、连线穿无关模块、含糊交叉、画布截断、圆柱弧线和缩放可读性。
 - PNG 模式：实际查看最终 PNG 并核对尺寸，不能只看脚本成功或自动报告。报告仅是几何证据，不证明算法正确或真实硬件／模型运行。
-- Visio 模式：在 Visio 中重新打开最终 `.vsdx`，核对图形、中文和折线，并确认模块文字可修改、形状和连接线可分别选中编辑；查看 Visio 导出的预览或应用截图，不能仅用 SVG 预览证明 `.vsdx` 正确。具体检查见 [references/visio-output.md](references/visio-output.md)。
+- Visio 模式：环境允许时，在 Visio 中重新打开最终 `.vsdx`，核对图形、中文和折线，并确认模块文字可修改、形状和连接线可分别选中编辑；查看 Visio 导出的预览或应用截图，不能仅用 SVG 预览证明 `.vsdx` 正确。具体检查见 [references/visio-output.md](references/visio-output.md)。
 - 保留同名布局 JSON、SVG／HTML。PNG 模式交付完整 PNG 主图；Visio 模式交付 `.vsdx` 主文件及已有预览。不要留下多张未说明的新旧候选图。
 
 最终回复给所选格式的文件链接，有预览时展示主图，简短说明阅读方向和有意义的核对结果；未完成 Visio 验证时如实说明，不用长篇绘图过程取代图件。

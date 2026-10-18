@@ -2,8 +2,8 @@
 .SYNOPSIS
 Create an editable .vsdx with desktop Visio from a flowchart JSON specification.
 .DESCRIPTION
-Python validates/resolves the layout and writes native VDX shapes and connectors.
-A new invisible Visio instance opens that drawing and saves a real .vsdx. Existing
+Python validates/resolves the layout and prepares native geometry and text.
+A new invisible Visio instance creates native objects and saves a real .vsdx. Existing
 Visio windows are never attached to. Requires Windows, Python >= 3.10 and Visio >= 2013.
 #>
 [CmdletBinding()]
@@ -62,7 +62,9 @@ try {
     $python = Find-Python
     $parent = [IO.Path]::GetDirectoryName($outputFile)
     [void][IO.Directory]::CreateDirectory($parent)
-    $scratch = Join-Path $parent ('.flowchart-visio-' + [Guid]::NewGuid().ToString('N'))
+    # Keep Office's working files in the current user's local temporary folder.
+    # Publish the VSDX to the requested output path only after saved-package checks.
+    $scratch = Join-Path ([IO.Path]::GetTempPath()) ('.flowchart-visio-' + [Guid]::NewGuid().ToString('N'))
     [void][IO.Directory]::CreateDirectory($scratch)
     $vdx = Join-Path $scratch 'drawing.vdx'
     $vsdx = Join-Path $scratch 'drawing.vsdx'
@@ -73,30 +75,40 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Invalid flowchart input or VDX generation failed. No VSDX was written.' }
     try { $visio = New-Object -ComObject Visio.InvisibleApp }
     catch { throw ('Desktop Visio could not start in this session. Install/activate Visio 2013 or later and run from an interactive Windows session. No PNG fallback was performed. Details: ' + $_.Exception.Message) }
-    $visio.AlertResponse = 7 # No: never accept repair/conversion prompts silently.
+    $visio.AlertResponse = 7 # Decline link updates and other Yes/No prompts in our own instance.
     $visio.EventsEnabled = $false
     if ([double]::Parse($visio.Version, [Globalization.CultureInfo]::InvariantCulture) -lt 15) { throw 'VSDX export requires Visio 2013 (version 15) or later.' }
-    # visOpenHidden (64) | visOpenDontList (8) | visOpenMacrosDisabled (128).
-    $document = $visio.Documents.OpenEx($vdx, [int16]200)
-    $document.SaveAs($vsdx)
-    $document.Close()
-    [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($document)
-    $document = $null
-    # Reopen the saved result: a successful SaveAs alone does not prove it is usable.
-    $document = $visio.Documents.OpenEx($vsdx, [int16]200)
+    . (Join-Path $PSScriptRoot 'visio_native.ps1')
+    Write-Verbose 'Creating native Visio objects'
+    $document = New-NativeVisioDocument -Application $visio -VdxPath $vdx
+    Write-Verbose 'Saving native VSDX'
+    [void]$document.SaveAs($vsdx)
     $page = $document.Pages.Item(1)
     $shapeCount = $page.Shapes.Count
     $connectionCount = $page.Connects.Count
-    if ($shapeCount -lt 1) { throw 'Visio reopened an empty drawing.' }
-    if ($previewFile) { $page.Export($png) }
+    if ($shapeCount -lt 1) { throw 'Visio created an empty drawing.' }
+    if ($previewFile) { Write-Verbose 'Exporting Visio PNG preview'; [void]$page.Export($png) }
     [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($page)
     $page = $null
     $document.Saved = $true
-    $document.Close()
+    [void]$document.Close()
     [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($document)
     $document = $null
+    # Verify the actual saved package without a second Office open operation.
+    # Desktop reopening/editing is exercised by the opt-in integration test.
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $archive = [IO.Compression.ZipFile]::OpenRead($vsdx)
+    try {
+        if ($null -eq $archive.GetEntry('visio/document.xml') -or $null -eq $archive.GetEntry('visio/pages/page1.xml')) { throw 'Visio did not save a valid VSDX package.' }
+        $entryReader = New-Object IO.StreamReader($archive.GetEntry('visio/pages/page1.xml').Open())
+        try { [xml]$savedPage = $entryReader.ReadToEnd() } finally { $entryReader.Dispose() }
+        $savedShapes = $savedPage.SelectNodes("//*[local-name()='Shape' and @Type='Shape']")
+        if ($savedShapes.Count -ne $shapeCount) { throw 'Saved package shape count does not match the native drawing.' }
+        if ($savedPage.SelectNodes("//*[local-name()='Section' and @N='Geometry']/*[local-name()='Row' and @IX='0']").Count -gt 0) { throw 'Saved geometry is missing the native component header.' }
+        if ($savedPage.SelectNodes("//*[local-name()='ForeignData']").Count -gt 0) { throw 'Saved drawing unexpectedly contains flattened image data.' }
+    } finally { $archive.Dispose() }
     if (-not (Test-Path -LiteralPath $vsdx -PathType Leaf) -or (Get-Item -LiteralPath $vsdx).Length -eq 0) { throw 'Visio did not create a nonempty VSDX file.' }
-    # Publish only after generation and reopen checks succeed. Recheck no-clobber
+    # Publish only after native generation and saved-package checks succeed. Recheck no-clobber
     # targets in case another process created them while Visio was working.
     [void](Check-Target $outputFile '.vsdx')
     if ($previewFile) {
@@ -105,7 +117,7 @@ try {
         [IO.File]::Copy($png, $previewFile, [bool]$Overwrite)
     }
     [IO.File]::Copy($vsdx, $outputFile, [bool]$Overwrite)
-    [ordered]@{ status = 'visio-exported'; vsdx = $outputFile; preview = $previewFile; shapes = $shapeCount; connections = $connectionCount; visioVersion = $visio.Version } | ConvertTo-Json -Compress
+    [ordered]@{ status = 'visio-exported'; vsdx = $outputFile; preview = $previewFile; shapes = $shapeCount; connections = $connectionCount; visioVersion = $visio.Version; packageChecked = $true; reopenVerified = $false } | ConvertTo-Json -Compress
 } catch {
     [Console]::Error.WriteLine('Error: ' + $_.Exception.Message)
     exit 1

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Export a flowchart as native, editable Visio 2003 XML (.vdx).
 
-Uses only the standard library. The Windows wrapper opens this interchange file
-in Microsoft Visio and saves a .vsdx; this module never automates the desktop.
+Uses only the standard library. The Windows wrapper reads this drawing plan and uses Visio COM to create native
+objects and save a .vsdx; this module never automates the desktop.
 """
 from __future__ import annotations
 
@@ -223,15 +223,20 @@ def _edge(shape, edge, refs, page_height, connects, ports):
     dx, dy = end[0]-begin[0], end[1]-begin[1]
     length = math.hypot(dx, dy)
     angle = math.atan2(dy, dx) if length else 0
+    local_y = [-(p[0]-begin[0])*math.sin(angle)+(p[1]-begin[1])*math.cos(angle) for p in points]
+    bend_height = max(local_y)-min(local_y)
+    y_offset = -min(local_y)
     # A 1D shape's local x axis follows its start/end vector. The geometry below
     # maps the explicit page-space bends into that coordinate system.
     transform = element(shape, "XForm")
-    cell(transform, "PinX", begin[0], "BeginX")
-    cell(transform, "PinY", begin[1], "BeginY")
+    cell(transform, "PinX", (begin[0]+end[0])/2, "(BeginX+EndX)*0.5")
+    cell(transform, "PinY", (begin[1]+end[1])/2, "(BeginY+EndY)*0.5")
     cell(transform, "Width", length, "SQRT((EndX-BeginX)^2+(EndY-BeginY)^2)")
-    cell(transform, "Height", 0)
-    cell(transform, "LocPinX", 0)
-    cell(transform, "LocPinY", 0)
+    # Match the transform and nonnegative local Y coordinates used by native
+    # DrawPolyline, including its nonzero height for bends.
+    cell(transform, "Height", bend_height)
+    cell(transform, "LocPinX", length/2, "Width*0.5")
+    cell(transform, "LocPinY", y_offset, "Height*" + number(y_offset/bend_height) if bend_height > 1e-12 else "0")
     cell(transform, "Angle", angle, "ATAN2(EndY-BeginY,EndX-BeginX)")
     endpoints = element(shape, "XForm1D")
     for which, point, field in (("Begin", begin, "from"), ("End", end, "to")):
@@ -252,10 +257,10 @@ def _edge(shape, edge, refs, page_height, connects, ports):
         row = element(geom, "MoveTo" if index == 0 else "LineTo", IX=index+1)
         if index == 0:
             cell(row, "X", 0)
-            cell(row, "Y", 0)
+            cell(row, "Y", y_offset, "LocPinY")
         elif index == len(points)-1:
             cell(row, "X", length, "Width")
-            cell(row, "Y", 0)
+            cell(row, "Y", y_offset, "LocPinY")
         else:
             # Keep bends on the first/last segment aligned with the glued port
             # when one endpoint moves. Interior waypoints remain editable.
@@ -271,8 +276,8 @@ def _edge(shape, edge, refs, page_height, connects, ports):
             vx, vy = point[0]-begin[0], point[1]-begin[1]
             cell(row, "X", vx*math.cos(angle)+vy*math.sin(angle),
                  "("+px+"-BeginX)*COS(Angle)+("+py+"-BeginY)*SIN(Angle)")
-            cell(row, "Y", -vx*math.sin(angle)+vy*math.cos(angle),
-                 "-("+px+"-BeginX)*SIN(Angle)+("+py+"-BeginY)*COS(Angle)")
+            cell(row, "Y", -vx*math.sin(angle)+vy*math.cos(angle)+y_offset,
+                 "-("+px+"-BeginX)*SIN(Angle)+("+py+"-BeginY)*COS(Angle)+LocPinY")
     _metadata(shape, "edge", edge)
 
 

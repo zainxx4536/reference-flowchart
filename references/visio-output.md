@@ -4,15 +4,15 @@
 
 ## 依赖与交付
 
-需要 Windows、PowerShell，以及已安装并可通过 COM 启动的桌面版 Microsoft Visio 2013 或更高版本。仅有 Visio 网页版、查看器或 Office 其他应用不能提供本脚本所需的自动化接口。Visio 导出不依赖 Node、Playwright 或浏览器；Python 标准库负责生成解析后布局与原生 VDX 中间文件，PowerShell 再调用 Visio COM 打开 VDX 并另存为 `.vsdx`。仅生成 VDX 可跨平台运行。
+需要 Windows、PowerShell，以及已安装并可通过 COM 启动的桌面版 Microsoft Visio 2013 或更高版本。仅有 Visio 网页版、查看器或 Office 其他应用不能提供本脚本所需的自动化接口。Visio 导出不依赖 Node、Playwright 或浏览器。Python 标准库校验并解析布局，生成 XML 绘图计划；`scripts/visio_native.ps1` 读取计划，通过独立的桌面 Visio COM 实例逐一创建原生形状、文字与一维连接线，设置胶合关系，再保存 `.vsdx`。主流程不调用 Visio 的 VDX 导入功能。
 
-主交付为 `.vsdx`：由原生 VDX 导入的模块、分区、文字、汇合点和连接线由 Visio 原生对象构成，可在 Visio 中单独选择、编辑文字、移动或调整。不能将整张 SVG／PNG 导入后保存，或仅改扩展名，作为本模式的完成条件。保留源 JSON、解析后 `.layout.json` 及同轮次 SVG／HTML，便于核对来源和重新生成。
+主交付为 `.vsdx`：模块、分区、文字、汇合点和连接线由 COM 创建的 Visio 原生对象构成，可在 Visio 中单独选择、编辑文字、移动或调整。不能将整张 SVG／PNG 导入后保存，或仅改扩展名，作为本模式的完成条件。保留源 JSON、解析后 `.layout.json` 及同轮次 SVG／HTML，便于核对来源和重新生成。
 
 ## 生成
 
 先按 [spec-format.md](spec-format.md) 设计布局并运行生成器。Visio 导出器使用生成器解析后的 `.layout.json`，其中对齐、等距和自动路由已经转为最终坐标与折点；也可传入原始规格，导出器会复用相同的校验、对齐和路由逻辑；为便于比对，推荐使用同轮次 `.layout.json`。
 
-在仓库根目录执行：
+`scripts/export_visio.ps1` 负责准备绘图计划、调用原生建图 helper、保存结果并核对 VSDX 包结构。在仓库根目录执行：
 
 ```powershell
 python scripts/render_flowchart.py assets/branching-flowchart.json --output-base output/my-flowchart
@@ -29,24 +29,28 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/export_visio.ps1 -La
 
 Python 不在 PATH 时，为 PowerShell 命令添加 `-PythonPath "C:/Python/python.exe"`。
 
-也可先只生成 VDX 中间源：
+脚本默认拒绝覆盖。确认目标文件属于本次任务后，为 Visio 命令追加 `-Overwrite`；生成器单独使用 `--overwrite`。带空格的路径加双引号。修改源 JSON 后，重新生成解析后布局，再导出 Visio，不能混用不同轮次文件。PowerShell 使用的 XML 绘图计划是临时文件，成功或失败后均会清理。
+
+## 可选：保留旧版 XML 中间源
+
+需要独立保留绘图计划或检查其结构时，可只用 Python 生成 VDX：
 
 ```powershell
 python scripts/export_visio.py output/my-flowchart.layout.json --output output/my-flowchart.vdx
 ```
 
-VDX 具有原生形状、文字、连接线和胶合关系；在有桌面 Visio 的环境中可打开并另存为 `.vsdx`。用户选择 `.vsdx` 时，不能仅交付 VDX 就声称已完成。PowerShell 入口使用的 VDX 是临时文件，成功或失败后均会清理；需要保留 VDX 时，必须单独运行上面的 Python 命令。不能调用桌面 Visio 时，保留原始输入与已有 SVG／HTML 等源文件，说明依赖，并询问用户是否接受另行生成的 VDX 或切换 PNG。
+此命令可跨平台运行，只使用 Python 标准库；默认拒绝覆盖，确认后添加 `--overwrite`。VDX 是旧版 Visio XML 中间源，记录形状、文字、连接线与胶合关系，不是 `.vsdx`。部分 Visio 安装的 VDX 导入受限，XML 结构校验通过也不能保证手动导入成功；主导出流程读取其中的绘图计划并通过 COM 建图，不依赖该导入功能。
 
-脚本默认拒绝覆盖。确认目标文件属于本次任务后，为 Visio 命令追加 `-Overwrite`；生成器与 Python VDX 导出器单独使用 `--overwrite`。带空格的路径加双引号。修改源 JSON 后，重新生成解析后布局，再导出 Visio，不能混用不同轮次文件。
+用户选择 `.vsdx` 时，不能仅交付 VDX 就声称已完成。不能调用桌面 Visio 时，保留原始输入与已有 SVG／HTML 等源文件，说明原因并询问是否切换 PNG。只有用户明确接受 XML 中间源时才另行交付 VDX，并说明兼容性限制；需要保留它时必须单独运行上面的 Python 命令。
 
 ## 完成前核对
 
-1. 重新用桌面 Visio 打开保存后的 `.vsdx`，确认文件可正常读取。
+1. 环境允许时，重新用桌面 Visio 打开保存后的 `.vsdx`，确认文件可正常读取；无法实际重开或编辑验证时，在交付中披露限制。
 2. 查看 Visio 导出的预览或应用截图，检查中文字体、上下标、首行强调、圆柱文字边距、分区标题、箭头方向、正交折点、画布边界与原布局；字体度量可能与浏览器不同，发现截断时调整源布局后重新导出。
 3. 检查至少一个模块的文字可修改，形状和连接线可单独选中编辑，并核对连接端点。文件可打开或预览看起来相似，均不能单独证明其内容可编辑。
 4. 与 PNG 模式共用语义检查：输入输出连续，控制与反馈接收方明确，式号和来源定位正确。Visio 文件不代替来源核对。
 
-XML 结构、形状数量、文字内容和连接关系的单元检查只验证中间文件结构，不证明目标 Visio 版本能正确打开或显示；也不能单独证明最终 `.vsdx` 的实际编辑效果。桌面 Visio 验证需在安装且能够运行 Visio 的 Windows 会话中完成。
+XML 结构、形状数量、文字内容和连接关系的单元检查只验证绘图计划，不证明最终 `.vsdx` 能在目标 Visio 版本中正确打开或显示，也不能单独证明其实际编辑效果。导出器核对保存后的 VSDX 包中原生形状数量且无嵌入整图，不自动重开文档；包结构检查不能替代中文排版与实际编辑检查。桌面 Visio 验证需在安装且能够运行 Visio 的 Windows 会话中完成。
 
 具备可用桌面 Visio 时，可单独运行集成检查：
 

@@ -46,6 +46,7 @@ function Invoke-Exporter([switch]$Overwrite) {
     $command = '$ProgressPreference = ''SilentlyContinue''; & ' + (& $quote $exportScript) +
         ' -LayoutPath ' + (& $quote $layoutPath) +
         ' -OutputPath ' + (& $quote $outputPath) +
+        ' -PreviewPath ' + (& $quote $previewPath) +
         ' -PythonPath ' + (& $quote $PythonPath)
     if ($Overwrite) { $command += ' -Overwrite' }
     $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
@@ -85,7 +86,7 @@ function Get-GlueTargets($Shape) {
                 $connection = $connections.Item($index)
                 $fromCell = $connection.FromCell
                 $toShape = $connection.ToSheet
-                $result[[string]$fromCell.NameU] = [string]$toShape.NameU
+                $result[[string]$fromCell.Name] = [string]$toShape.NameU
             } finally {
                 Release-Com $toShape
                 Release-Com $fromCell
@@ -104,6 +105,14 @@ function Assert-NativeDrawing($Page, $Layout) {
             $shape = $Page.Shapes.ItemU('node-' + $expected.id)
             Assert-True ([int]$shape.Type -eq 3) ('Expected a native Visio shape for ' + $expected.id)
             Assert-True ([int]$shape.OneD -eq 0) ('Expected a 2D node for ' + $expected.id)
+            Assert-Near (Read-Cell $shape 'PinX') (($expected.x + $expected.width / 2) / 96) ('Node X position changed: ' + $expected.id)
+            Assert-Near (Read-Cell $shape 'PinY') (($Layout.canvas.height - $expected.y - $expected.height / 2) / 96) ('Node Y position changed: ' + $expected.id)
+            Assert-Near (Read-Cell $shape 'Width') ($expected.width / 96) ('Node width changed: ' + $expected.id)
+            Assert-Near (Read-Cell $shape 'Height') ($expected.height / 96) ('Node height changed: ' + $expected.id)
+            $fontSize = 25
+            if ($Layout.canvas.Contains('font_size')) { $fontSize = $Layout.canvas.font_size }
+            if ($expected.Contains('font_size')) { $fontSize = $expected.font_size }
+            Assert-Near (Read-Cell $shape 'Char.Size') ($fontSize / 96) ('Node font size changed: ' + $expected.id)
             $actualText = Normalize-Text ([string]$shape.Text)
             Assert-True ($actualText -ceq ($expected.lines -join "`n")) ('Native Chinese text did not survive for ' + $expected.id)
         } finally { Release-Com $shape }
@@ -168,6 +177,7 @@ try {
     [void][IO.Directory]::CreateDirectory($testRoot)
     $layoutPath = Join-Path $testRoot '输入 layout 中文.json'
     $outputPath = Join-Path $testRoot '可编辑 flow chart.vsdx'
+    $previewPath = Join-Path $testRoot 'Visio 预览.png'
     $movedPath = Join-Path $testRoot '移动和编辑后 drawing.vsdx'
     $layout = [ordered]@{
         canvas = [ordered]@{ width = 800; height = 850; title = '中文流程图'; font_family = 'Microsoft YaHei' }
@@ -178,7 +188,7 @@ try {
             [ordered]@{ id = 'store'; x = 100; y = 590; width = 200; height = 100; shape = 'cylinder'; lines = @('存储结果', '可编辑文本') }
         )
         edges = @(
-            [ordered]@{ id = 'start-process'; from = 'start'; to = 'process'; points = @(@(200, 150), @(200, 230)); arrow = $true },
+            [ordered]@{ id = 'start-process'; from = 'start'; to = 'process'; points = @(@(200, 150), @(200, 180), @(350, 180), @(350, 210), @(200, 210), @(200, 230)); arrow = $true },
             [ordered]@{ id = 'process-decision'; from = 'process'; to = 'decision'; points = @(@(200, 310), @(200, 390)); arrow = $true },
             [ordered]@{ id = 'decision-store'; from = 'decision'; to = 'store'; points = @(@(200, 510), @(200, 590)); arrow = $true }
         )
@@ -188,13 +198,16 @@ try {
     $result = Invoke-Exporter
     Assert-True ($result.ExitCode -eq 0) ('Initial Visio export failed. Desktop Visio must be available in this Windows session. ' + $result.Stderr + $result.Stdout)
     Assert-True ((Test-Path -LiteralPath $outputPath -PathType Leaf) -and (Get-Item -LiteralPath $outputPath).Length -gt 0) 'Exporter did not create a nonempty VSDX.'
+    Assert-True (Test-Path -LiteralPath $previewPath -PathType Leaf) 'Visio did not export the requested PNG preview.'
+    $pngBytes = [IO.File]::ReadAllBytes($previewPath)
+    Assert-True ($pngBytes.Length -gt 24 -and [BitConverter]::ToString($pngBytes, 0, 8) -ceq '89-50-4E-47-0D-0A-1A-0A') 'Preview is not a PNG image.'
     $originalHash = Get-Sha256 $outputPath
     try { $visio = New-Object -ComObject Visio.InvisibleApp }
     catch { throw ('Cannot start desktop Visio for native integration checks. This is a test failure, not a skip. ' + $_.Exception.Message) }
     $visio.AlertResponse = 7
     $visio.EventsEnabled = $false
     Assert-True ([double]::Parse($visio.Version, [Globalization.CultureInfo]::InvariantCulture) -ge 15) 'Visio 2013 or later is required.'
-    $document = $visio.Documents.OpenEx($outputPath, [int16]200)
+    $document = $visio.Documents.OpenEx($outputPath, [int16]136)
     $page = $document.Pages.Item(1)
     Assert-NativeDrawing $page $layout
     $before = @{}
@@ -212,12 +225,14 @@ try {
         Write-Cell $node 'PinY' ((Read-Cell $node 'PinY') + 0.25)
         $node.Text = '中文流程：已在 Visio 编辑'
         $layout.nodes[1].lines = @('中文流程：已在 Visio 编辑')
+        $layout.nodes[1].x += 48
+        $layout.nodes[1].y -= 24
     } finally { Release-Com $node }
     Assert-MovedEndpoints $page $before 0.5 0.25
-    $document.SaveAs($movedPath)
+    [void]$document.SaveAs($movedPath)
     Release-Com $page; $page = $null
     $document.Close(); Release-Com $document; $document = $null
-    $document = $visio.Documents.OpenEx($movedPath, [int16]200)
+    $document = $visio.Documents.OpenEx($movedPath, [int16]136)
     $page = $document.Pages.Item(1)
     Assert-NativeDrawing $page $layout
     Assert-MovedEndpoints $page $before 0.5 0.25
@@ -228,15 +243,17 @@ try {
     Assert-True ($refused.ExitCode -ne 0) 'Exporter unexpectedly overwrote an existing VSDX without -Overwrite.'
     Assert-True (($refused.Stderr + $refused.Stdout) -match 'already exists') 'Exporter failed for a reason other than refusing to overwrite.'
     Assert-True ((Get-Sha256 $outputPath) -ceq $originalHash) 'Refused export changed the existing VSDX.'
+    $layout.nodes[1].x = 100
+    $layout.nodes[1].y = 230
     $layout.nodes[1].lines = @('覆盖成功：新的中文文本')
     [IO.File]::WriteAllText($layoutPath, ($layout | ConvertTo-Json -Depth 12), $utf8)
     $replaced = Invoke-Exporter -Overwrite
     Assert-True ($replaced.ExitCode -eq 0) ('Explicit -Overwrite export failed. ' + $replaced.Stderr + $replaced.Stdout)
-    $document = $visio.Documents.OpenEx($outputPath, [int16]200)
+    $document = $visio.Documents.OpenEx($outputPath, [int16]136)
     $page = $document.Pages.Item(1)
     Assert-NativeDrawing $page $layout
 } catch {
-    [Console]::Error.WriteLine('FAIL: ' + $_.Exception.Message)
+    [Console]::Error.WriteLine('FAIL: ' + $_.Exception.Message + [Environment]::NewLine + $_.ScriptStackTrace)
     exit 1
 } finally {
     Release-Com $page

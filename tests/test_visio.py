@@ -88,8 +88,12 @@ class VisioTests(unittest.TestCase):
                 rows = list(shape.find('v:Geom', NS))
                 rows = [r for r in rows if r.tag.rsplit('}', 1)[-1] in ('MoveTo', 'LineTo')]
                 self.assertEqual(len(rows), len(edge['points']))
+                local_ys = [value(row, 'v:Y') for row in rows]
+                self.assertGreaterEqual(min(local_ys), -1e-8)
+                self.assertLessEqual(max(local_ys), value(shape, 'v:XForm/v:Height') + 1e-8)
                 for row, expected in zip(rows, edge['points']):
-                    u, v = value(row, 'v:X'), value(row, 'v:Y')
+                    u = value(row, 'v:X') - value(shape, 'v:XForm/v:LocPinX')
+                    v = value(row, 'v:Y') - value(shape, 'v:XForm/v:LocPinY')
                     page_x = (x + u * math.cos(angle) - v * math.sin(angle)) * 96
                     page_y = spec['canvas']['height'] - (y + u * math.sin(angle) + v * math.cos(angle)) * 96
                     self.assertAlmostEqual(page_x, expected[0], places=6)
