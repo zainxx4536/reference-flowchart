@@ -141,8 +141,11 @@ class VisioTests(unittest.TestCase):
 
     def test_unicode_paths_and_explicit_overwrite(self):
         with tempfile.TemporaryDirectory(prefix='Visio 中文 ') as directory:
-            target = Path(directory) / '子目录' / '可编辑 图件.vdx'
-            self.assertEqual(write_visio(sample(), target), target)
+            parent = Path(directory) / '子目录'
+            parent.mkdir()
+            # Exercise a noncanonical path even when the temp directory has no aliases.
+            target = parent / '..' / '子目录' / '可编辑 图件.vdx'
+            self.assertEqual(write_visio(sample(), target), target.resolve())
             before = target.read_bytes()
             changed = sample()
             changed['nodes'][1]['lines'] = ['新输出']
