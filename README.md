@@ -239,6 +239,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tests/visio.integration.ps1 
 
 将 `-PythonPath` 换为实际 Python 路径。示例的 `-ExecutionPolicy Bypass` 仅影响本次 PowerShell 进程，不修改系统执行策略。
 
+已在本地 Windows、Windows PowerShell 5.1、Visio 16.0 和 Python 3.14.5 环境完成上述集成检查：真实导出并重新打开 `.vsdx`、核对原生形状和中文文字、编辑文字、移动节点后检查胶合端点随动、保存后再次打开，以及默认拒绝覆盖和显式覆盖。该结果对应集成测试样本；其他图件、字体和 Visio 版本仍需按实际输出核对，不能用此结果替代逐图视觉检查。
+
 ## 常见问题
 
 | 现象 | 处理方式 |

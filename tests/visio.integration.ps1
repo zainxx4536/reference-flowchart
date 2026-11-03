@@ -207,7 +207,9 @@ try {
     $visio.AlertResponse = 7
     $visio.EventsEnabled = $false
     Assert-True ([double]::Parse($visio.Version, [Globalization.CultureInfo]::InvariantCulture) -ge 15) 'Visio 2013 or later is required.'
-    $document = $visio.Documents.OpenEx($outputPath, [int16]136)
+    # Construct a .NET path string at the COM boundary. Passing Join-Path
+    # output directly can stall OpenEx in Windows PowerShell.
+    $document = $visio.Documents.OpenEx([IO.Path]::GetFullPath($outputPath), [int16]136)
     $page = $document.Pages.Item(1)
     Assert-NativeDrawing $page $layout
     $before = @{}
@@ -232,7 +234,7 @@ try {
     [void]$document.SaveAs($movedPath)
     Release-Com $page; $page = $null
     $document.Close(); Release-Com $document; $document = $null
-    $document = $visio.Documents.OpenEx($movedPath, [int16]136)
+    $document = $visio.Documents.OpenEx([IO.Path]::GetFullPath($movedPath), [int16]136)
     $page = $document.Pages.Item(1)
     Assert-NativeDrawing $page $layout
     Assert-MovedEndpoints $page $before 0.5 0.25
@@ -249,7 +251,7 @@ try {
     [IO.File]::WriteAllText($layoutPath, ($layout | ConvertTo-Json -Depth 12), $utf8)
     $replaced = Invoke-Exporter -Overwrite
     Assert-True ($replaced.ExitCode -eq 0) ('Explicit -Overwrite export failed. ' + $replaced.Stderr + $replaced.Stdout)
-    $document = $visio.Documents.OpenEx($outputPath, [int16]136)
+    $document = $visio.Documents.OpenEx([IO.Path]::GetFullPath($outputPath), [int16]136)
     $page = $document.Pages.Item(1)
     Assert-NativeDrawing $page $layout
 } catch {
